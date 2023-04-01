@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "dapr-ambient.fullname" . }}
+  labels:
+    {{- include "dapr-ambient.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "dapr-ambient.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "dapr-ambient.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "dapr-ambient.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-proxy
+          image: "{{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ambient.proxy.image.pullPolicy }}
+          volumeMounts:
+          - name: shared-data
+            mountPath: /shared
+          env: 
+          - name: AMBIENT_PROXY_PORT
+            value: "{{ default "8080" .Values.ambient.proxy.port }}"
+          - name: AMBIENT_APP_REMOTE_URL
+            value: "{{ required ".Values.ambient.proxy.remoteURL is required" .Values.ambient.proxy.remoteURL }}"
+          - name: DAPR_CONTROL_PLANE_NAMESPACE
+            value: "{{ default "dapr-system" .Values.ambient.controlPlane.namespace }}"  
+          ports:
+          - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8080  
+        - name: daprd
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.ambient.daprd.image.registry }}/{{ .Values.ambient.daprd.image.name }}:{{ .Values.ambient.daprd.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ambient.daprd.image.pullPolicy }}
+          volumeMounts:
+          - name: shared-data
+            mountPath: /shared
+          command: ['/bin/sh', "-c"]
+          args:
+          - 
+            export DAPR_TRUST_ANCHORS=`cat /shared/DAPR_TRUST_ANCHORS`;
+            export DAPR_CERT_CHAIN=`cat /shared/DAPR_CERT_CHAIN`;
+            export DAPR_CERT_KEY=`cat /shared/DAPR_CERT_KEY`;
+            ./daprd --mode=kubernetes 
+                  --log-level={{ .Values.ambient.log.level }}
+                  --log-as-json={{ .Values.ambient.log.json }}
+                  --dapr-http-port={{ .Values.ambient.daprd.httpPort }}
+                  --dapr-grpc-port={{ .Values.ambient.daprd.grpcPort }}
+                  --dapr-internal-grpc-port={{ .Values.ambient.daprd.internalGrpcPort }}
+                  --dapr-listen-addresses={{ .Values.ambient.daprd.listenAddresses }}
+                  --dapr-public-port={{ .Values.ambient.daprd.publicPort }}
+                  --app-id={{ required ".Values.ambient.appId is required" .Values.ambient.appId }}
+                  --app-port="{{ required ".Values.ambient.daprd.app.port is required" .Values.ambient.daprd.app.port }}"
+                  --app-protocol="{{ required ".Values.ambient.daprd.app.protocol is required" .Values.ambient.daprd.app.protocol }}"
+                  --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.ambient.controlPlane.operatorAddress }}
+                  --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.ambient.controlPlane.placementServerAddress }}
+                  --sentry-address={{ .Values.ambient.controlPlane.sentryAddress }}
+                  --enable-metrics={{ .Values.ambient.daprd.metrics.enabled }}
+                  --metrics-port={{ .Values.ambient.daprd.metrics.port }}
+                  --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
+                  --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }};
+          env:
+          - name: DAPR_CONTROL_PLANE_NAMESPACE
+            value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}
+          - name: DAPR_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "dapr-ambient.fullname" . }}
+                key: dapr-api-token
+          {{- if .Values.ambient.daprd.app.token }}
+          - name: APP_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "dapr-ambient.fullname" . }}
+                key: app-api-token
+          {{- end }}
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          ports:
+            - name: http
+              containerPort: {{ .Values.ambient.daprd.httpPort }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.ambient.daprd.grpcPort }}
+              protocol: TCP
+            - name: internal-grpc
+              containerPort: {{ .Values.ambient.daprd.internalGrpcPort }}
+              protocol: TCP
+            - name: public-http
+              containerPort: {{ .Values.ambient.daprd.publicPort }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.ambient.daprd.metrics.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /v1.0/healthz
+              port: public-http
+          readinessProbe:
+            httpGet:
+              path: /v1.0/healthz
+              port: public-http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

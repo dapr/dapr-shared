@@ -1,0 +1,5 @@
+apiVersion: v2
+description: Helm Chart For Dapr Ambient Apps
+name: dapr-ambient
+version: 1.9.5
+icon: https://salaboy.files.wordpress.com/2019/07/avatar.png

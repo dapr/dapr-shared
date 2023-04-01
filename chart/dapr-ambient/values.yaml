@@ -1,0 +1,54 @@
+ambient:
+  log: 
+    level: info
+    json: true
+  controlPlane: 
+    namespace: "dapr-system"
+  serviceAccount: 
+    create: true 
+    name: ""
+    annotations: {}
+  service: 
+    type: "ClusterIP"  
+  proxy:
+    port: 8080
+    token: ""
+    image:  
+      registry: "docker.io/salaboy"
+      name: dapr-ambient-7ddb2845d8fd37d23356d25c2bef7c69
+      tag: latest
+      pullPolicy: Always
+  daprd:
+    app: 
+      port: 8080
+      protocol: "http"
+    token: ""
+    httpPort: 3500
+    grpcPort: 50001
+    internalGrpcPort: 50002
+    publicPort: 3501
+    listenAddresses: "0.0.0.0" 
+    image:
+      registry: "docker.io/salaboy"
+      name: daprd
+      tag: 1.9.6
+      pullPolicy: Always
+    metrics:
+      enabled: true
+      port: 9090
+    mtls:
+      enabled: false
+    apiLogging:
+      enabled: true  
+
+tolerations: 
+  # these tolerations are to have the daemonset runnable on control plane nodes
+  # remove them if your control plane nodes should not run pods
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+
+affinity: {}

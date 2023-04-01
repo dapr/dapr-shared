@@ -1,0 +1,23 @@
+{{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-ambient-secret-reader") }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dapr-ambient-secret-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+{{- end }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "dapr-ambient.fullname" . }}-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ include "dapr-ambient.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dapr-ambient-secret-reader

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dapr-ambient.fullname" . }}
+  labels:
+    {{- include "dapr-ambient.labels" . | nindent 4 }}
+spec:
+  type: {{ default "ClusterIP" .Values.ambient.service.type }}
+  ports:
+    - name: dapr-http
+      port: 80
+      protocol: TCP
+      targetPort: 3500
+    - name: dapr-grpc
+      port: 50001
+      protocol: TCP
+      targetPort: 50001
+    - name: dapr-internal
+      port: 50002
+      protocol: TCP
+      targetPort: 50002
+    - name: dapr-metrics
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    {{- include "dapr-ambient.selectorLabels" . | nindent 4 }}
