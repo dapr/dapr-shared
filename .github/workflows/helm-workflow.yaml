@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - "*"
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      
+      - name: setup helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3'
+          id: setup helm
+
+      - name: install helm
+        run: helm plugin install https://github.com/quintush/helm-unittest
+      
+      - name: execute unit tests
+        run: helm unittest chart/dapr-ambient -3
+    
