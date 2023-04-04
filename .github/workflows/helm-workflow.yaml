@@ -1,7 +1,5 @@
 on:
   push:
-    branches:
-      - "*"
 jobs:
   helm:
     runs-on: ubuntu-latest
