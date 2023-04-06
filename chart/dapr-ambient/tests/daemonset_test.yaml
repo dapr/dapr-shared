@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: test daemonset 
+templates:
+  - daemonset.yaml
+tests:
+  - it: should set tolerations
+    values:
+      - ./values/required.yaml
+    set:
+      ambient:
+        proxy:
+          remoteURL: local
+        appId: some-id
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/control-plane
+            operator: Exists
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+  - it: should set imagePullSecrets
+    values:
+      - ./values/required.yaml
+    set:
+      imagePullSecrets:
+        name: regcred
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets.name
+          value: regcred
+  - it: should set annotation
+    values:
+      - ./values/required.yaml
+    set:
+      podAnnotations:
+        imageregistry: https://local
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.imageregistry
+          value: https://local
+  - it: should set spec.template.spec.containers[0].image
+    values:
+      - ./values/required.yaml
+    set:
+      ambient:
+        proxy:
+          image:
+            registry: https://local-registry
+            name: app
+            tag: v0.0.1
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: https://local-registry/app:v0.0.1
+  
+  - it: should use chart version when ambient.proxy.image.registry.tag is empty
+    values:
+      - ./values/required.yaml
+    chart:
+      appVersion: v0.0.2
+    set:
+      ambient:
+        proxy:
+          image:
+            registry: https://local
+            name: local-image
+            tag: 
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: https://local/local-image:v0.0.2
+            
+
+
+
+
+      
+            
