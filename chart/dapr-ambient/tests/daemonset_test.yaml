@@ -3,13 +3,42 @@ suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
+  - it: should fail if ambient.proxy.remoteURL is not defined
+    asserts:
+      - failedTemplate:
+          errorMessage: .Values.ambient.proxy.remoteURL is required
+  - it: should not fail if ambient.proxy.remoteURL is defined
+    set:
+      ambient.proxy.remoteURL: http://local
+      ambient.appId: appId
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AMBIENT_APP_REMOTE_URL
+            value: http://local
+  - it: should fail if ambient.appId is not defined
+    set:
+      ambient.proxy.remoteURL: http://local
+    asserts:
+      - failedTemplate:
+          errorMessage: .Values.ambient.appId is required
+  - it: should not fail if ambient.appId is defined
+    set:
+      ambient.proxy.remoteURL: http://local
+      ambient.appId: appId
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].args[0]
+          pattern: --app-id=[appId]+
+
   - it: should set tolerations
     values:
       - ./values/required.yaml
     set:
       ambient:
         proxy:
-          remoteURL: local
+          remoteURL: http://local
         appId: some-id
       tolerations:
         - key: node-role.kubernetes.io/control-plane
@@ -82,6 +111,44 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: https://local/local-image:v0.0.2
+  
+  - it: should set spec.template.spec.containers[0].pullPolicy
+    values:
+      - ./values/required.yaml
+    set:
+      ambient.proxy.image.pullPolicy: Always
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+  
+  - it: should set env AMBIENT_PROXY_PORT=8080 for spec.template.spec.containers[0].env when ambient.proxy.port is empty
+    values:
+      - ./values/required.yaml
+    set:
+      ambient.proxy.port: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: 
+            name: AMBIENT_PROXY_PORT
+            value: "8080"
+
+  - it: should set env AMBIENT_PROXY_PORT=8888 for spec.template.spec.containers[0].env when ambient.proxy.port is equal to 8888
+    values:
+      - ./values/required.yaml
+    set:
+      ambient.proxy.port: 8888
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AMBIENT_PROXY_PORT
+            value: "8888"
+            
+            
+  
+            
             
 
 
