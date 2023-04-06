@@ -303,8 +303,8 @@ tests:
 
   - it: should fail when ambient.daprd.app.port is empty
     values:
-      - ./values/required.yaml
       - ../values.yaml
+      - ./values/required.yaml
     set:
       ambient.daprd.app.port:
     asserts:
@@ -313,8 +313,8 @@ tests:
 
   - it: should fail when ambient.daprd.app.protocol is empty
     values:
-      - ./values/required.yaml
       - ../values.yaml
+      - ./values/required.yaml
     set:
       ambient.daprd.app.protocol:
     asserts:
@@ -422,8 +422,8 @@ tests:
 
   - it: should set ports
     values:
-      - ./values/required.yaml
       - ../values.yaml
+      - ./values/required.yaml
     set:
       ambient:
         daprd:
