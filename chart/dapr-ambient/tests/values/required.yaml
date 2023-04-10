@@ -1,0 +1,4 @@
+ambient:
+  appId: appId
+  proxy:
+    remoteURL: https://local

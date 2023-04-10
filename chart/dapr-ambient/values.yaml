@@ -1,4 +1,5 @@
 ambient:
+  appId: ""
   log: 
     level: info
     json: true
@@ -12,6 +13,7 @@ ambient:
     type: "ClusterIP"  
   proxy:
     port: 8080
+    remoteURL: ""
     token: ""
     image:  
       registry: "docker.io/salaboy"
