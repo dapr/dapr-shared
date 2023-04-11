@@ -1,5 +1,6 @@
 ambient:
   appId: ""
+  useAsDeployment: false
   log: 
     level: info
     json: true

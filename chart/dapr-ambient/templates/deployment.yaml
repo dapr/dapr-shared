@@ -1,0 +1,4 @@
+{{- if .Values.ambient.useAsDeployment -}}
+apiVersion: apps/v1
+kind: Deployment
+{{- end -}}

@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: test deployment
+templates:
+  - deployment.yaml
+tests:
+  - it: when ambient.useAsDeployment is true should create the deployment resource
+    set:
+      ambient.useAsDeployment: true
+    asserts:
+      - isAPIVersion:
+          of: apps/v1
+  - it: when ambient.useAsDeployment is false should not create the deployment resource 
+    set:
+      ambient.useAsDeployment: false
+    asserts:
+      - hasDocuments:
+          count: 0
+          
+          
+            
+            
+      
