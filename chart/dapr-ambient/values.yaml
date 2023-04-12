@@ -1,6 +1,6 @@
 ambient:
   appId: ""
-  useAsDeployment: false
+  strategy: false
   log: 
     level: info
     json: true

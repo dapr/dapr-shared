@@ -3,15 +3,15 @@ suite: test deployment
 templates:
   - deployment.yaml
 tests:
-  - it: when ambient.useAsDeployment is true should create the deployment resource
+  - it: when ambient.strategy is deployment should create the deployment resource
     set:
-      ambient.useAsDeployment: true
+      ambient.strategy: "deployment"
     asserts:
       - isAPIVersion:
           of: apps/v1
-  - it: when ambient.useAsDeployment is false should not create the deployment resource 
+  - it: when ambient.strategy is daemonset should not create the deployment resource 
     set:
-      ambient.useAsDeployment: false
+      ambient.strategy: "daemonset"
     asserts:
       - hasDocuments:
           count: 0

@@ -1,4 +1,4 @@
-{{- if .Values.ambient.useAsDeployment -}}
+{{- if eq .Values.ambient.strategy "deployment" -}}
 apiVersion: apps/v1
 kind: Deployment
 {{- end -}}
