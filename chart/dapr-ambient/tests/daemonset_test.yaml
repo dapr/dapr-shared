@@ -3,6 +3,24 @@ suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
+  - it: when the ambient.strategy is daemonset should the daemonset resource
+    values:
+      - ./values/required.yaml
+    set:
+      ambient.strategy: "daemonset"
+    asserts:
+      - isAPIVersion:
+          of: apps/v1
+  
+  - it: when the ambient.strategy is deployment should not create the daemonset resource
+    values:
+    - ./values/required.yaml
+    set:
+      ambient.strategy: "deployment"
+    asserts:
+      - hasDocuments:
+          count: 0
+            
   - it: should fail if ambient.proxy.remoteURL is not defined
     asserts:
       - failedTemplate:

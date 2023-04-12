@@ -1,6 +1,6 @@
 ambient:
   appId: ""
-  strategy: false
+  strategy: daemonset
   log: 
     level: info
     json: true
