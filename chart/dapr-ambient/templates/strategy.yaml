@@ -1,6 +1,6 @@
 
 apiVersion: apps/v1
-kind: {{ if eq .Values.ambient.strategy "deployment" }}"Deployment"{{ else }}"Daemonset"{{ end }}
+kind: {{ if eq .Values.ambient.strategy "deployment" }}"Deployment"{{ else }}"DaemonSet"{{ end }}
 metadata:
   name: {{ include "dapr-ambient.fullname" . }}
   labels:
