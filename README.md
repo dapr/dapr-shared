@@ -4,9 +4,7 @@ Dapr Ambient allows you to create Dapr Applications using the `daprd` Sidecar as
 
 By running `daprd` as a Kubernetes `DaemonSet` the `daprd` container will be present in each Kubernetes Node, reducing the network hops between the applications and Dapr. 
 
-
 If you need multiple Dapr Applications you can deploy this chart multiple times using different `ambient.appId`s. 
-
 
 To deploy this chart you can run from inside the `chart/dapr-ambient` directory: 
 
@@ -16,8 +14,6 @@ helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.proxy.
 ```
 
 Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (for example for scopes) and `<REMOTE_URL>` is a reachable URL where `dapr-ambient` will forward notifications received by the Dapr sidecar. 
-
-
 
 Future versions might include forwarding notifications to multiple remote URLs.
 
@@ -29,4 +25,8 @@ You can run the following command to build containers for the `dapr-ambient` pro
 ```
 ko build --platform=linux/amd64,linux/arm64
 ```
+
+## Trying Dapr Ambient in your cluster
+
+If you are looking to try Dapr Ambient with a sample application you can follow the [step-by-step tutorial linked here](./docs/tutorial/dapr-ambient-and-knative.md).
 
