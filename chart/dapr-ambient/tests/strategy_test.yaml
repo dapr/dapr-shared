@@ -498,4 +498,11 @@ tests:
       - equal:
           path: spec.replicas
           value:  3
+  - it: |
+      when ambient.strategy is daemonset the spec.replicas should be empty
+    values:
+      - ./values/required.yaml
+    asserts:
+      - isNull:
+          path: spec.replicas
             
