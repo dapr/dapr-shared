@@ -1,4 +1,5 @@
 ambient:
   appId: appId
+  strategy: "daemonset"
   proxy:
     remoteURL: https://local
