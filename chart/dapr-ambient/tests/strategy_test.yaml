@@ -7,7 +7,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient.strategy: "daemonset"
+      ambient.strategy: daemonset
     asserts:
       - isAPIVersion:
           of: apps/v1
