@@ -14,9 +14,10 @@ tests:
   
   - it: when the ambient.strategy is deployment should not create the daemonset resource
     values:
-    - ./values/required.yaml
+      - ./values/required.yaml
     set:
-      ambient.strategy: "deployment"
+      ambient:
+        strategy: "deployment"
     asserts:
       - hasDocuments:
           count: 0
