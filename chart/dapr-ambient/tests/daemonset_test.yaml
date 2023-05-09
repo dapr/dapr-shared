@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: test daemonset 
 templates:
-  - strategy.yaml
+  - daemonset.yaml
 tests:
   - it: when the ambient.strategy is daemonset should be create the daemonset resource
     values:
@@ -11,17 +11,7 @@ tests:
     asserts:
       - isAPIVersion:
           of: apps/v1
-  
-  - it: when the ambient.strategy is deployment should not create the daemonset resource
-    values:
-      - ./values/required.yaml
-    set:
-      ambient:
-        strategy: "deployment"
-    asserts:
-      - isKind: 
-          of: "Deployment"
-            
+
   - it: should fail if ambient.proxy.remoteURL is not defined
     asserts:
       - failedTemplate:
@@ -471,33 +461,7 @@ tests:
             - name: metrics
               containerPort: 5555
               protocol: TCP
-  - it: when ambient.deployment.replicas is null the quantity of replicas should be 1
-    values:
-      - ./values/required.yaml
-    set:
-      ambient:
-        strategy: deployment
-        deployment:
-          replicas:
-    asserts:
-      - equal:
-          path: spec.replicas
-          value: 1
 
-  - it: |
-      when ambient.deployment.replicas is 3 and ambient.strategy is deployment the 
-        spec.replicas filed should be 3
-    values:
-      - ./values/required.yaml
-    set:
-      ambient:
-        strategy: deployment
-        deployment:
-          replicas: 3
-    asserts:
-      - equal:
-          path: spec.replicas
-          value:  3
   - it: |
       when ambient.strategy is daemonset the spec.replicas should be empty
     values:

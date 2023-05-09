@@ -1,5 +1,0 @@
-{{ if eq .Values.ambient.strategy "deployment" }}
-{{ include "deployment" . }}
-{{ else }}
-{{ include "daemonset" . }}
-{{ end }}

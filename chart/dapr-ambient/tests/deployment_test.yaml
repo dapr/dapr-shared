@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: test deplyment
+templates:
+  - deployment.yaml
+tests:
+  - it: when the ambient.strategy is deployment should not create the daemonset resource
+    values:
+      - ./values/required.yaml
+    set:
+      ambient:
+        strategy: "deployment"
+    asserts:
+      - isKind: 
+          of: "Deployment"
+  - it: when ambient.deployment.replicas is null the quantity of replicas should be 1
+    values:
+      - ./values/required.yaml
+    set:
+      ambient:
+        strategy: deployment
+        deployment:
+          replicas:
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+  - it: |
+      when ambient.deployment.replicas is 3 and ambient.strategy is deployment the 
+        spec.replicas filed should be 3
+    values:
+      - ./values/required.yaml
+    set:
+      ambient:
+        strategy: deployment
+        deployment:
+          replicas: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value:  3
