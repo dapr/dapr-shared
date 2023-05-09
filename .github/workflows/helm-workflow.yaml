@@ -22,5 +22,5 @@ jobs:
         run: helm plugin install https://github.com/quintush/helm-unittest
       
       - name: execute unit tests
-        run: helm unittest chart/dapr-ambient -3
+        run: helm unittest chart/dapr-ambient
     
