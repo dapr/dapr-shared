@@ -3,6 +3,15 @@ suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
+  - it: when the ambient.strategy is daemonset should be create the daemonset resource
+    values:
+      - ./values/required.yaml
+    set:
+      ambient.strategy: daemonset
+    asserts:
+      - isAPIVersion:
+          of: apps/v1
+
   - it: should fail if ambient.proxy.remoteURL is not defined
     asserts:
       - failedTemplate:
@@ -452,4 +461,12 @@ tests:
             - name: metrics
               containerPort: 5555
               protocol: TCP
+
+  - it: |
+      when ambient.strategy is daemonset the spec.replicas should be empty
+    values:
+      - ./values/required.yaml
+    asserts:
+      - isNull:
+          path: spec.replicas
             

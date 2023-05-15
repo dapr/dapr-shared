@@ -1,0 +1,11 @@
+{{- if eq .Values.ambient.strategy "deployment" -}}
+apiVersion: apps/v1
+kind: "Deployment"
+metadata:
+  name: {{ include "dapr-ambient.fullname" . }}
+  labels:
+    {{- include "dapr-ambient.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ambient.deployment.replicas | default "1" | int }}
+{{ include "daemon-deploy-shared" .  }}
+{{- end -}}

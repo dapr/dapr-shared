@@ -1,5 +1,8 @@
 ambient:
   appId: ""
+  strategy: daemonset
+  deployment:
+    replicas: 1
   log: 
     level: info
     json: true
