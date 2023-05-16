@@ -1,2 +1,7 @@
-FROM daprio/daprd:1.9.6
-COPY --from=busybox:1.28 /bin/sh /bin/sh
+FROM daprio/daprd:1.9.6 as daprd
+
+
+FROM alpine:latest
+
+COPY --from=daprd daprd daprd
+

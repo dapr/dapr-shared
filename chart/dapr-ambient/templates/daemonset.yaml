@@ -50,7 +50,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health/readiness
-              port: 8080  
+              port: 8080
         - name: daprd
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -61,10 +61,10 @@ spec:
             mountPath: /shared
           command: ['/bin/sh', "-c"]
           args:
-          - 
-            export DAPR_TRUST_ANCHORS=`cat /shared/DAPR_TRUST_ANCHORS`;
-            export DAPR_CERT_CHAIN=`cat /shared/DAPR_CERT_CHAIN`;
-            export DAPR_CERT_KEY=`cat /shared/DAPR_CERT_KEY`;
+          -
+            export DAPR_TRUST_ANCHORS=$(cat /shared/DAPR_TRUST_ANCHORS);
+            export DAPR_CERT_CHAIN=$(cat /shared/DAPR_CERT_CHAIN);
+            export DAPR_CERT_KEY=$(cat /shared/DAPR_CERT_KEY);
             ./daprd --mode=kubernetes 
                   --log-level={{ .Values.ambient.log.level }}
                   --log-as-json={{ .Values.ambient.log.json }}

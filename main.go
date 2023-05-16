@@ -49,13 +49,21 @@ func setEnv() {
 	os.Setenv(sentryConsts.CertChainEnvVar, certChain)
 	os.Setenv(sentryConsts.CertKeyEnvVar, certKey)
 
-	trustAnchorsString := []byte(trustAnchors)
-	certChainString := []byte(certChain)
-	certKeyString := []byte(certKey)
-	os.WriteFile("/shared/DAPR_TRUST_ANCHORS", trustAnchorsString, 0644)
-	os.WriteFile("/shared/DAPR_CERT_CHAIN", certChainString, 0644)
-	os.WriteFile("/shared/DAPR_CERT_KEY", certKeyString, 0644)
+	fmt.Println(trustAnchors)
+	fmt.Println(certChain)
+	fmt.Println(certKey)
 
+	WriteFile("/shared/DAPR_TRUST_ANCHORS", trustAnchors)
+	WriteFile("/shared/DAPR_CERT_CHAIN", certChain)
+	WriteFile("/shared/DAPR_CERT_KEY", certKey)
+
+}
+
+func WriteFile(where, what string) {
+	err := os.WriteFile(where, []byte(what), 0644)
+	if err != nil {
+		fmt.Println("error while writing file")
+	}
 }
 
 func main() {

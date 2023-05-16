@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample
+  labels:
+    app.kubernetes.io/name: sample
+spec:
+  selector:
+    matchLabels:
+      app: sample 
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: sample
+        image: matheuscruzdev/dapr-ambient-sample
+        env:
+          - name: APP_PORT
+            value: "8080"
+          - name: STATE_STORE_NAME
+            value: state
+          - name: DAPR_AMBIENT_PORT
+            value: "50001"
+          - name: DAPR_AMBIENT_HOST
+            value: "dapr-ambient.default.svc.cluster.local"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample
+spec:
+  selector:
+    app: sample
+    app.kubernetes.io/name: sample
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
