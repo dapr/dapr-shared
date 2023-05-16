@@ -48,7 +48,6 @@ Selector labels
 {{- define "dapr-ambient.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "dapr-ambient.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-dapr-ambient: sample
 {{- end }}
 
 {{/*
