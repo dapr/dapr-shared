@@ -28,5 +28,5 @@ ko build --platform=linux/amd64,linux/arm64
 
 ## Trying Dapr Ambient in your cluster
 
-If you are looking to try Dapr Ambient with a sample application you can follow the [step-by-step tutorial linked here](./docs/tutorial/dapr-ambient-and-knative.md).
+If you are looking to try Dapr Ambient with a sample application you can follow the [step-by-step tutorial linked here](./docs/using-dapr-ambient/README.md).
 

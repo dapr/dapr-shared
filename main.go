@@ -49,10 +49,6 @@ func setEnv() {
 	os.Setenv(sentryConsts.CertChainEnvVar, certChain)
 	os.Setenv(sentryConsts.CertKeyEnvVar, certKey)
 
-	fmt.Println(trustAnchors)
-	fmt.Println(certChain)
-	fmt.Println(certKey)
-
 	WriteFile("/shared/DAPR_TRUST_ANCHORS", trustAnchors)
 	WriteFile("/shared/DAPR_CERT_CHAIN", certChain)
 	WriteFile("/shared/DAPR_CERT_KEY", certKey)
