@@ -2,56 +2,64 @@
 This tutorial provides step-by-step instructions for installing Dapr Ambient and configuring a set of applications to work with it.
 
 ## Prerequisites and Installation
-Before proceeding, ensure that you have the necessary tools installed on your system. We will be creating a local KinD cluster and utilizing dapr-ambiente.
+Before proceeding, ensure that you have the necessary tools installed on your system. We will be creating a local KinD cluster and utilizing Dapr Ambient.
 
 To get started, make sure you have the following CLIs installed:
 
-- Docker: The Docker software is required and can be downloaded and installed from the official website (https://www.docker.com/).
+- [Docker](https://www.docker.com/)
 
-- KinD (Kubernetes in Docker): KinD is a tool that enables running Kubernetes clusters using Docker. Follow the instructions in the KinD documentation (https://kind.sigs.k8s.io/docs/user/quick-start/) to install it on your machine.
+- [KinD (Kubernetes in Docker)](https://kind.sigs.k8s.io/docs/user/quick-start/)
 
-- kubectl: kubectl is the command-line tool used to interact with Kubernetes clusters. It is required for managing the deployment and configuration of applications. You can install kubectl by following the instructions provided in the Kubernetes documentation (https://kubernetes.io/docs/tasks/tools/).
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
-- Helm: Helm is a package manager for Kubernetes that simplifies the deployment and management of applications. Install Helm by following the instructions in the Helm documentation (https://helm.sh/docs/intro/install/).
+- [Helm](https://helm.sh/docs/intro/install/)
 
 The installation of these CLIs is essential for the successful setup of Dapr Ambient with KinD.
 
-## Create a local Kubernetes cluster with: 
+## Creating a local Kubernetes cluster with KinD: 
+
+Here, you will create a simple kubernetes cluster with KinD defaults running the following command:
 
 ```bash
   kind create cluster --name dapr-ambient
 ```
 
-Installing Redis:
+## Installing Redis into the KinD cluster:
 
-```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update                            
-helm install redis bitnami/redis --set image.tag=6.2 --set architecture=standalone
-```
+On this step, you will use helm to install the redis into the kubernetes cluster:
 
-Finally, let's install Dapr into the Cluster: 
-
-```
-helm repo add dapr https://dapr.github.io/helm-charts/
-helm repo update
-helm upgrade --install dapr dapr/dapr \
---version=1.10.4 \
---namespace dapr-system \
---create-namespace \
---wait
+```sh
+  helm repo add bitnami https://charts.bitnami.com/bitnami
+  helm repo update                            
+  helm install redis bitnami/redis --set image.tag=6.2 --set architecture=standalone
 ```
 
-Let's now deploy and configure some Dapr apps! 
+Finally, let's install Dapr: 
 
-
-## Deploying the applications and wiring things together
-
-In this section, we will be deploying three applications that want to store and read data from a state store and publish and consume messages. 
-To achieve this we will use the Dapr StateStore and PubSub components. So before deploying our applications let's configure these components to connect the Redis instance that we created before. 
-
-The Dapr Statestore configuration looks like this: 
+```sh
+  helm repo add dapr https://dapr.github.io/helm-charts/
+  helm repo update
+  helm upgrade --install dapr dapr/dapr \
+  --version=1.10.4 \
+  --namespace dapr-system \
+  --create-namespace \
+  --wait
 ```
+
+Note that you create a new namespace calles `dapr-system`.
+
+## Installing Dapr Components
+
+In this section, we will be install two Dapr Building block: [Publish and Subscriber](https://docs.dapr.io/developing-applications/building-blocks/pubsub/pubsub-overview/) and [State Management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/). All Building Blocks will use [Redis](https://redis.io/) for their purposes.
+
+
+So before deploying our applications let's configure these components to connect the Redis instance that we created before. 
+
+Create the StateStore component applying this resource to Kubernetes by running:
+
+```sh
+kubectl apply -f - <<EOF
+apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: statestore
@@ -69,15 +77,13 @@ spec:
       key: redis-password
 auth:
   secretStore: kubernetes
+EOF
 ```
 
-We can apply this resource to Kubernetes by running: 
-```
-kubectl apply -f resources/statestore.yaml
-```
+Create the PubSub component applying this resource to Kubernetes by running:
 
-The PubSub Component looks like this: 
-```
+```sh
+kubectl apply -f - <<EOF
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
@@ -94,34 +100,84 @@ spec:
       key: redis-password
 auth:
   secretStore: kubernetes
+EOF
 ```
 
-We can apply this resource to Kubernetes by running: 
-```
-kubectl apply -f resources/pubsub.yaml
-```
+Once we have the PubSub component configured, we can register Subscritions to define who and where notifications will be sent when new messages arrive to a certain topic.
 
-Once we have the PubSub component configured, we can register Subscritions to define who and where notifications will be sent when new messages arrive to a certain topic. A Subscription resource look like this: 
+Create the Subscription component applying this resource to Kubernetes by running:
 
-```
+```sh
+kubectl apply -f - <<EOF
 apiVersion: dapr.io/v1alpha1
 kind: Subscription
 metadata:
-  name: notifications-subscritpion
+  name: notifications-subscription
 spec:
   topic: notifications 
   route: /notifications
   pubsubname: notifications-pubsub
+EOF
 ```
 
-Finally, let's deploy three applications that uses the Dapr StateStore and PubSub components. This are normal/regular Kubernetes applications, using Deployments and Services. To make these apps dapr-aware we just need to add some Dapr annotations:
+## Installing Dapr Ambient and all applications
 
+Finally, let's install Dapr Ambient and three applications that uses the Dapr StateStore and PubSub components.
 
+Install Dapr Ambient running this:
+
+```sh
+  helm install my-ambient-dapr-ambient ...
 ```
 
+Let's deploy the apps:
+
+This are normal/regular Kubernetes applications, using Deployments and Services.
+```sh
+  kubectl apply -f https://github.com/salaboy/dapr-ambient-examples/apps.yaml
 ```
 
-Let's deploy the apps with: 
+If you want to see the implementation's detail, you [can access this repository](https://github.com/salaboy/dapr-ambient-examples).
+
+### Saving using the write-values application
+
+Let's create a value on the store:
+
+```sh
+  kubectl port-forward svc/write-values-svc 8080:8080
 ```
-kubectl apply -f apps.yaml
+
+Send a request to the application:
+
+```sh
+  curl --request POST \
+  --url 'http://localhost:8080/?value=10'
+``` 
+
+You can see the log using `kubectl logs -f <pod>`
+
+At this point the `subscriber` application has been received the notification from `dapr-ambient`. You can see this, with the same way, using `kubectl logs -f <pod>`.
+
+### Getting the average fom read-values application
+
+The `read-values` applications gets all values from StateStore and calculates the average.
+
+```sh
+  kubectl port-forward svc/read-values-svc 8888:8080
 ```
+
+After, you can make a request to `read-values-svc`:
+
+```sh
+  curl http://localhost:8888
+```
+
+The response should looks like it:
+
+```
+10
+```
+
+## Thank you
+
+In this tutorial you gets how to use Dapr Ambient with some Kubernetes applications.

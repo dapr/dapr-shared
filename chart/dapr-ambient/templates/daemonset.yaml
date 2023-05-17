@@ -62,6 +62,7 @@ spec:
           command: ['/bin/sh', "-c"]
           args:
           -
+            sleep 10s;
             export DAPR_TRUST_ANCHORS=$(cat /shared/DAPR_TRUST_ANCHORS);
             export DAPR_CERT_CHAIN=$(cat /shared/DAPR_CERT_CHAIN);
             export DAPR_CERT_KEY=$(cat /shared/DAPR_CERT_KEY);
