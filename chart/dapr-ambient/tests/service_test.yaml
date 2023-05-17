@@ -4,6 +4,8 @@ templates:
   - service.yaml
 tests:
   - it: should set the service type
+    values:
+      - ./values/required.yaml
     set:
       ambient:
         service:
@@ -14,6 +16,8 @@ tests:
           value: "ClusterIP"
 
   - it: should set the service type when the .Values.ambient.service.type is empty
+    values:
+      - ./values/required.yaml
     set:
       ambient:
         service:
