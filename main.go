@@ -58,7 +58,7 @@ func setEnv() {
 func WriteFile(where, what string) {
 	err := os.WriteFile(where, []byte(what), 0644)
 	if err != nil {
-		fmt.Println("error while writing file")
+		panic(err)
 	}
 }
 
