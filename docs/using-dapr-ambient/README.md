@@ -46,11 +46,12 @@ Finally, let's install Dapr:
   --wait
 ```
 
-Note that you create a new namespace calles `dapr-system`.
+Note that you create a new namespace called `dapr-system`.
 
 ## Installing Dapr Components
 
-In this section, we will be install two Dapr Building block: [Publish and Subscriber](https://docs.dapr.io/developing-applications/building-blocks/pubsub/pubsub-overview/) and [State Management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/). All Building Blocks will use [Redis](https://redis.io/) for their purposes.
+In this section, we will be install two Dapr Building block: [Publish and Subscriber](https://docs.dapr.io/developing-applications/building-blocks/pubsub/pubsub-overview/) and [State Management](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/). 
+All Building Blocks will use [Redis](https://redis.io/) for their purposes.
 
 
 So before deploying our applications let's configure these components to connect the Redis instance that we created before. 
@@ -158,6 +159,40 @@ Send a request to the application:
 You can see the log using `kubectl logs -f <pod>`
 
 At this point the `subscriber` application has been received the notification from `dapr-ambient`. You can see this, with the same way, using `kubectl logs -f <pod>`.
+
+### Getting the message on subscriber application
+
+When the application `write-values` save a value on Redis, after it is published an event to topic `notifications`.
+
+You can see the logs following those steps:
+
+Execute the following command:
+```sh
+  kubectl get pods
+```
+
+Select the subscriber pod, and execute it:
+
+```sh
+  kubectl logs -f <subscribe-pod-name-here>
+```
+
+The logs should look like it:
+
+```
+2023/05/19 14:55:57 Starting Subscriber in Port: 8080
+2023/05/19 14:57:02 POST /notifications HTTP/1.1
+Host: subscriber-svc:8080
+Accept-Encoding: gzip
+Content-Length: 406
+Content-Type: application/cloudevents+json
+Pubsubname: notifications-pubsub
+Traceparent: 00-00000000000000000000000000000000-0000000000000000-00
+User-Agent: fasthttp
+
+{"data":"10","datacontenttype":"text/plain","id":"7447314d-89a8-4144-a9b8-6be357aee618","pubsubname":"notifications-pubsub","source":"my-dapr-app","specversion":"1.0","time":"2023-05-19T14:57:02Z","topic":"notifications","traceid":"00-00000000000000000000000000000000-0000000000000000-00","traceparent":"00-00000000000000000000000000000000-0000000000000000-00","tracestate":"","type":"com.dapr.event.sent"}
+Subscriber received on /notifications: 10
+```
 
 ### Getting the average fom read-values application
 

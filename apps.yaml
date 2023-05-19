@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: read-values
+spec:
+  selector:
+    matchLabels:
+      app: read-values
+  template:
+    metadata:
+      labels:
+        app: read-values
+    spec:
+      containers:
+      - name: read-values
+        image: matheuscruzdev/read-values
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: read-values-svc
+spec:
+  selector:
+    app: read-values
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriber
+spec:
+  selector:
+    matchLabels:
+      app: subscriber
+  template:
+    metadata:
+      labels:
+        app: subscriber
+    spec:
+      containers:
+      - name: subscriber
+        image: matheuscruzdev/subscriber:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: subscriber-svc
+spec:
+  selector:
+    app: subscriber
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: write-values
+spec:
+  selector:
+    matchLabels:
+      app: write-values
+  template:
+    metadata:
+      labels:
+        app: write-values
+    spec:
+      containers:
+      - name: write-values
+        image: matheuscruzdev/write-values:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: write-values-svc
+spec:
+  selector:
+    app: write-values
+  ports:
+  - port: 8080
+    targetPort: 8080
