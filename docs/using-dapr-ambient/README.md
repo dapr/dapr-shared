@@ -129,7 +129,7 @@ Install Dapr Ambient running this:
 
 ```sh
   helm package  chart/dapr-ambient
-  helm install my-ambient-dapr-ambient dapr-ambient-1.9.5.tgz --set ambient.appId=read-values --set ambient.proxy.remoteURL=read-values-svc:8080
+  helm install my-ambient-dapr-ambient dapr-ambient-1.9.5.tgz --set ambient.appId=my-dapr-app --set ambient.proxy.remoteURL=subscriber-svc:8080
 ```
 
 Let's deploy the apps:
