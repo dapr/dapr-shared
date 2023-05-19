@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: read-values
-        image: matheuscruzdev/read-values
+        image: salaboy/read-values
         resources:
           limits:
             memory: "128Mi"
@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
       - name: subscriber
-        image: matheuscruzdev/subscriber:latest
+        image: salaboy/subscriber:latest
         resources:
           limits:
             memory: "128Mi"
@@ -81,7 +81,7 @@ spec:
     spec:
       containers:
       - name: write-values
-        image: matheuscruzdev/write-values:latest
+        image: salaboy/write-values:latest
         resources:
           limits:
             memory: "128Mi"
