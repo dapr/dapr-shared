@@ -135,7 +135,7 @@ Let's deploy the apps:
 
 This are normal/regular Kubernetes applications, using Deployments and Services.
 ```sh
-  kubectl apply -f https://raw.githubusercontent.com/salaboy/dapr-example-apps/main/apps.yaml
+  kubectl apply -f https://raw.githubusercontent.com/salaboy/dapr-ambient-examples/main/apps.yaml
 ```
 
 If you want to see the implementation's detail, you [can access this repository](https://github.com/salaboy/dapr-ambient-examples).
