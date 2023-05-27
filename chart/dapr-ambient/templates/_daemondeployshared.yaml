@@ -53,6 +53,8 @@
           command: ['/bin/sh', "-c"]
           args:
           - 
+            echo "Waiting dapr-ambient...";
+            sleep 10s;
             export DAPR_TRUST_ANCHORS=`cat /shared/DAPR_TRUST_ANCHORS`;
             export DAPR_CERT_CHAIN=`cat /shared/DAPR_CERT_CHAIN`;
             export DAPR_CERT_KEY=`cat /shared/DAPR_CERT_KEY`;
@@ -73,7 +75,8 @@
                   --enable-metrics={{ .Values.ambient.daprd.metrics.enabled }}
                   --metrics-port={{ .Values.ambient.daprd.metrics.port }}
                   --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
-                  --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }};
+                  --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
+                  --app-channel-address="{{ .Values.ambient.proxy.remoteURL }}";
           env:
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}
