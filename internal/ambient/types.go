@@ -7,7 +7,7 @@ type DaprTrustBundle struct {
 	TrustAnchors string
 }
 
-// ToMap convert a DaprTrustBundle struct to map[string]string.
+// ToMap converts a DaprTrustBundle struct to map[string]string.
 func (d *DaprTrustBundle) ToMap() map[string]string {
 	return map[string]string{
 		"dapr-trust-anchors": d.TrustAnchors,
