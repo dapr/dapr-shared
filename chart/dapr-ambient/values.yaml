@@ -19,8 +19,8 @@ ambient:
     remoteURL: ""
     token: ""
     image:  
-      registry: "docker.io/salaboy"
-      name: dapr-ambient-7ddb2845d8fd37d23356d25c2bef7c69
+      registry: "docker.io/matheuscruzdev"
+      name: dapr-ambient
       tag: latest
       pullPolicy: Always
   daprd:
@@ -34,9 +34,9 @@ ambient:
     publicPort: 3501
     listenAddresses: "0.0.0.0" 
     image:
-      registry: "docker.io/salaboy"
+      registry: "docker.io/matheuscruzdev"
       name: daprd
-      tag: 1.9.6
+      tag: latest
       pullPolicy: Always
     metrics:
       enabled: true
