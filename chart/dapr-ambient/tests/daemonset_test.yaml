@@ -12,22 +12,6 @@ tests:
       - isAPIVersion:
           of: apps/v1
 
-  - it: should fail if ambient.proxy.remoteURL is not defined
-    asserts:
-      - failedTemplate:
-          errorMessage: .Values.ambient.proxy.remoteURL is required
-
-  - it: should not fail if ambient.proxy.remoteURL is defined
-    set:
-      ambient.proxy.remoteURL: https://local
-      ambient.appId: appId
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: AMBIENT_APP_REMOTE_URL
-            value: https://local
-
   - it: should fail if ambient.appId is not defined
     set:
       ambient.proxy.remoteURL: https://local
@@ -41,7 +25,7 @@ tests:
       ambient.appId: appId
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: --app-id=[appId]+
 
   - it: should set tolerations
@@ -94,38 +78,6 @@ tests:
       - equal:
           path: spec.template.metadata.annotations.imageregistry
           value: https://local
-
-  - it: should set spec.template.spec.containers[0].image
-    values:
-      - ./values/required.yaml
-    set:
-      ambient:
-        proxy:
-          image:
-            registry: https://local-registry
-            name: app
-            tag: v0.0.1
-    asserts:
-      - equal:
-          path: spec.template.spec.containers[0].image
-          value: https://local-registry/app:v0.0.1
-  
-  - it: should use chart version when ambient.proxy.image.tag is empty
-    values:
-      - ./values/required.yaml
-    chart:
-      appVersion: v0.0.2
-    set:
-      ambient:
-        proxy:
-          image:
-            registry: https://local
-            name: local-image
-            tag: 
-    asserts:
-      - equal:
-          path: spec.template.spec.containers[0].image
-          value: https://local/local-image:v0.0.2
   
   - it: should set spec.template.spec.containers[0].pullPolicy
     values:
@@ -136,40 +88,6 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
-  
-  - it: should set env AMBIENT_PROXY_PORT=8080 for spec.template.spec.containers[0].env when ambient.proxy.port is empty
-    values:
-      - ./values/required.yaml
-    set:
-      ambient.proxy.port: ""
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: 
-            name: AMBIENT_PROXY_PORT
-            value: "8080"
-
-  - it: should set env AMBIENT_PROXY_PORT=8888 for spec.template.spec.containers[0].env when ambient.proxy.port is equal to 8888
-    values:
-      - ./values/required.yaml
-    set:
-      ambient.proxy.port: 8888
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: AMBIENT_PROXY_PORT
-            value: "8888"
-
-  - it: should set AMBIENT_APP_REMOTE_URL=https://local for spec.template.spec.containers[0].env
-    values:
-      - ./values/required.yaml # ambient.proxy.remoteURL=https://local
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: AMBIENT_APP_REMOTE_URL
-            value: https://local
   
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-system for spec.template.spec.containers[0].env when
@@ -197,7 +115,7 @@ tests:
             name: DAPR_CONTROL_PLANE_NAMESPACE
             value: dapr-namespace
 
-  - it: should set spec.template.spec.containers[1].image 
+  - it: should set spec.template.spec.containers[0].image 
     values:
       - ./values/required.yaml
     set:
@@ -209,105 +127,85 @@ tests:
             tag: v0.0.1
     asserts:
       - equal:
-          path: spec.template.spec.containers[1].image
-          value: https://local/daprd-image:v0.0.1
-            
-  - it: should use chart version when ambient.daprd.image.tag is empty
-    values:
-      - ./values/required.yaml
-    chart:
-      appVersion: v0.0.2
-    set:
-      ambient:
-        daprd:
-          image:
-            registry: https://local
-            name: daprd-image
-            tag:
-    asserts:
-      - equal:
-          path: spec.template.spec.containers[1].image
-          value: https://local/daprd-image:v0.0.2
-            
+          path: spec.template.spec.containers[0].image
+          value: https://local/daprd-image:v0.0.1  
     
-  - it: should set spec.template.spec.containers[1].imagePullPolicy
+  - it: should set spec.template.spec.containers[0].imagePullPolicy
     values:
       - ./values/required.yaml
     set:
       ambient.daprd.image.pullPolicy: Always
     asserts:
       - equal:
-          path: spec.template.spec.containers[1].imagePullPolicy
+          path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
   
-  - it: should set spec.template.spec.containers[1].args
+  - it: should set spec.template.spec.containers[0].args
     values:
       - ../values.yaml
       - ./values/required.yaml
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
-          pattern: ^export DAPR_TRUST_ANCHORS=`cat /shared/DAPR_TRUST_ANCHORS`; export DAPR_CERT_CHAIN=`cat
-              /shared/DAPR_CERT_CHAIN`; export DAPR_CERT_KEY=`cat /shared/DAPR_CERT_KEY`; ./daprd
-              --mode=kubernetes --log-level=info --log-as-json=true --dapr-http-port=3500 --dapr-grpc-port=50001
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^./daprd --mode=kubernetes --log-level=info --log-as-json=true --dapr-http-port=3500 --dapr-grpc-port=50001
               --dapr-internal-grpc-port=50002 --dapr-listen-addresses=0.0.0.0 --dapr-public-port=3501
               --app-id=appId --app-port="8080" --app-protocol="http" --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
               --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
               --sentry-address= --enable-metrics=true --metrics-port=9090 --enable-mtls=false
               --enable-api-logging=true;$
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--log-level=info\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--log-as-json=true\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--dapr-http-port=3500\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--dapr-grpc-port=50001\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--dapr-internal-grpc-port=50002\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--dapr-listen-addresses=0.0.0.0\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--dapr-public-port=3501\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--app-id=appId\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--app-port="8080"\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--app-protocol="http"\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--control-plane-address=dapr-api.dapr-system.svc.cluster.local:80\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--sentry-address=\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--app-protocol="http"\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--enable-metrics=true\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--metrics-port=9090\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--enable-mtls=false\s
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--enable-api-logging=true;$
 
   - it: should fail when ambient.daprd.app.port is empty
@@ -338,7 +236,7 @@ tests:
       ambient.controlPlane.operatorAddress: 
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--control-plane-address=dapr-api.dapr-system.svc.cluster.local:80\s
    
   - it: should set --control-plane-address=control.plane.address:80 when ambient.controlPlane.operatorAddress is equal to control.plane.address:80
@@ -349,7 +247,7 @@ tests:
       ambient.controlPlane.operatorAddress: control.plane.address:80
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--control-plane-address=control.plane.address:80\s
 
   - it: |
@@ -362,7 +260,7 @@ tests:
       ambient.controlPlane.operatorAddress: 
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005\s
    
   - it: |
@@ -375,7 +273,7 @@ tests:
       ambient.controlPlane.operatorAddress: control.plane.address:80
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: \s--control-plane-address=control.plane.address:80\s
   
   - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
@@ -386,8 +284,8 @@ tests:
       ambient.daprd.app.token: true
     asserts:
       - lengthEqual:
-          path: spec.template.spec.containers[1].env
-          count: 5
+          path: spec.template.spec.containers[0].env
+          count: 8
 
   - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
     values:
@@ -397,8 +295,8 @@ tests:
       ambient.daprd.app.token: false
     asserts:
       - lengthEqual:
-          path: spec.template.spec.containers[1].env
-          count: 4
+          path: spec.template.spec.containers[0].env
+          count: 7
 
   - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
     values:
@@ -408,7 +306,7 @@ tests:
       ambient.daprd.app.token: true
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: DAPR_API_TOKEN
             valueFrom:
@@ -424,7 +322,7 @@ tests:
       ambient.daprd.app.token: true
     asserts:
       - notContains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: DAPR_API_TOKEN
 
@@ -444,7 +342,7 @@ tests:
             port: 5555
     asserts:
       - equal:
-          path: spec.template.spec.containers[1].ports
+          path: spec.template.spec.containers[0].ports
           value:
             - name: http
               containerPort: 1111
