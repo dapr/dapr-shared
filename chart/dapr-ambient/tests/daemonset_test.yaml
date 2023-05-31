@@ -147,12 +147,14 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^./daprd --mode=kubernetes --log-level=info --log-as-json=true --dapr-http-port=3500 --dapr-grpc-port=50001
+          pattern: ^./daprd
+              --mode=kubernetes --log-level=info --log-as-json=true --dapr-http-port=3500 --dapr-grpc-port=50001
               --dapr-internal-grpc-port=50002 --dapr-listen-addresses=0.0.0.0 --dapr-public-port=3501
               --app-id=appId --app-port="8080" --app-protocol="http" --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
               --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
               --sentry-address= --enable-metrics=true --metrics-port=9090 --enable-mtls=false
-              --enable-api-logging=true;$
+              --enable-api-logging=true
+              --app-channel-address="https://local";$
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: \s--log-level=info\s
@@ -206,7 +208,10 @@ tests:
           pattern: \s--enable-mtls=false\s
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: \s--enable-api-logging=true;$
+          pattern: \s--enable-api-logging=true\s
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: \s--app-channel-address="https://local";$
 
   - it: should fail when ambient.daprd.app.port is empty
     values:
