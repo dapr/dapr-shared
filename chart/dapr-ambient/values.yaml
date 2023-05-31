@@ -34,9 +34,9 @@ ambient:
     publicPort: 3501
     listenAddresses: "0.0.0.0" 
     image:
-      registry: "docker.io/salaboy"
+      registry: "docker.io/daprio"
       name: daprd
-      tag: 1.9.6
+      tag: 1.11.0-rc.5
       pullPolicy: Always
     metrics:
       enabled: true
