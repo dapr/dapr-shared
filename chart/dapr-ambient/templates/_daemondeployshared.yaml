@@ -20,20 +20,17 @@
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: setup-trust-bundle
-          image: {{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag }}
+          image: "{{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag }}"
       containers:
         - name: daprd
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.ambient.daprd.image.registry }}/{{ .Values.ambient.daprd.image.name }}:{{ .Values.ambient.daprd.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.ambient.daprd.image.pullPolicy }}
-          volumeMounts:
-          - name: shared-data
-            mountPath: /shared
-          command: ['/bin/sh', "-c"]
+          command: ['./daprd']
           args:
           - 
-            ./daprd --mode=kubernetes 
+            --mode=kubernetes 
                   --log-level={{ .Values.ambient.log.level }}
                   --log-as-json={{ .Values.ambient.log.json }}
                   --dapr-http-port={{ .Values.ambient.daprd.httpPort }}

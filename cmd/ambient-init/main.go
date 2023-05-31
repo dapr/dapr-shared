@@ -56,7 +56,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 // LookupEnvOrString tries to look for an environment variable, if found, return it, otherwise find,

@@ -19,7 +19,7 @@ ambient:
     remoteURL: ""
     token: ""
     image:  
-      registry: "docker.io/salaboy"
+      registry: "docker.io/matheuscruzdev"
       name: dapr-ambient
       tag: latest
       pullPolicy: Always
