@@ -20,7 +20,7 @@
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: setup-trust-bundle
-          image: salaboy/dapr-ambient:latest
+          image: {{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag }}
       containers:
         - name: daprd
           securityContext:

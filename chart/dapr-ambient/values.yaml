@@ -20,7 +20,7 @@ ambient:
     token: ""
     image:  
       registry: "docker.io/salaboy"
-      name: dapr-ambient-7ddb2845d8fd37d23356d25c2bef7c69
+      name: dapr-ambient
       tag: latest
       pullPolicy: Always
   daprd:
