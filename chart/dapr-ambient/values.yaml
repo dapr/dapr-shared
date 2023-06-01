@@ -14,9 +14,7 @@ ambient:
     annotations: {}
   service: 
     type: "ClusterIP"  
-  proxy:
-    port: 8080
-    remoteURL: ""
+  initContainer:
     token: ""
     image:  
       registry: "docker.io/salaboy"

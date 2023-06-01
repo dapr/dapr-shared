@@ -20,7 +20,7 @@
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: setup-trust-bundle
-          image: "{{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag }}"
+          image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
       containers:
         - name: daprd
           securityContext:

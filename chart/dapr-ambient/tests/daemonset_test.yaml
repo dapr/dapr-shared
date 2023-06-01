@@ -82,7 +82,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient.proxy.image.pullPolicy: Always
+      ambient.initContainer.image.pullPolicy: Always
     asserts:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
