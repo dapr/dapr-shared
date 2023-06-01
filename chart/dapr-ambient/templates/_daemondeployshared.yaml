@@ -48,7 +48,7 @@
                   --metrics-port={{ .Values.ambient.daprd.metrics.port }}
                   --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
                   --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
-                  --app-channel-address="{{ .Values.ambient.proxy.remoteURL }}";
+                  --app-channel-address="{{ .Values.ambient.channelAddress }}";
           env:
           - name: DAPR_TRUST_ANCHORS
             valueFrom:

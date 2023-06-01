@@ -14,14 +14,14 @@ tests:
 
   - it: should fail if ambient.appId is not defined
     set:
-      ambient.proxy.remoteURL: https://local
+      ambient.channelAddress: https://local
     asserts:
       - failedTemplate:
           errorMessage: .Values.ambient.appId is required
 
   - it: should not fail if ambient.appId is defined
     set:
-      ambient.proxy.remoteURL: https://local
+      ambient.channelAddress: https://local
       ambient.appId: appId
     asserts:
       - matchRegex:
@@ -33,8 +33,7 @@ tests:
       - ./values/required.yaml
     set:
       ambient:
-        proxy:
-          remoteURL: https://local
+        remoteURL: https://local
         appId: some-id
       tolerations:
         - key: node-role.kubernetes.io/control-plane

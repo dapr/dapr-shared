@@ -11,7 +11,7 @@ If you need multiple Dapr Applications you can deploy this chart multiple times 
 To deploy this chart you can run from inside the `chart/dapr-ambient` directory: 
 
 ```
-helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.proxy.remoteURL=<REMOTE_URL>  
+helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.channelAddress=<REMOTE_URL>  
 
 ```
 
