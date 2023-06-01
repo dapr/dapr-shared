@@ -27,28 +27,27 @@
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.ambient.daprd.image.registry }}/{{ .Values.ambient.daprd.image.name }}:{{ .Values.ambient.daprd.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.ambient.daprd.image.pullPolicy }}
-          command: ['./daprd']
           args:
-          - 
-            --mode=kubernetes 
-                  --log-level={{ .Values.ambient.log.level }}
-                  --log-as-json={{ .Values.ambient.log.json }}
-                  --dapr-http-port={{ .Values.ambient.daprd.httpPort }}
-                  --dapr-grpc-port={{ .Values.ambient.daprd.grpcPort }}
-                  --dapr-internal-grpc-port={{ .Values.ambient.daprd.internalGrpcPort }}
-                  --dapr-listen-addresses={{ .Values.ambient.daprd.listenAddresses }}
-                  --dapr-public-port={{ .Values.ambient.daprd.publicPort }}
-                  --app-id={{ required ".Values.ambient.appId is required" .Values.ambient.appId }}
-                  --app-port="{{ required ".Values.ambient.daprd.app.port is required" .Values.ambient.daprd.app.port }}"
-                  --app-protocol="{{ required ".Values.ambient.daprd.app.protocol is required" .Values.ambient.daprd.app.protocol }}"
-                  --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.ambient.controlPlane.operatorAddress }}
-                  --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.ambient.controlPlane.placementServerAddress }}
-                  --sentry-address={{ .Values.ambient.controlPlane.sentryAddress }}
-                  --enable-metrics={{ .Values.ambient.daprd.metrics.enabled }}
-                  --metrics-port={{ .Values.ambient.daprd.metrics.port }}
-                  --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
-                  --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
-                  --app-channel-address="{{ .Values.ambient.channelAddress }}";
+          - /daprd
+          - --mode=kubernetes 
+          - --log-level={{ .Values.ambient.log.level }}
+          - --log-as-json={{ .Values.ambient.log.json }}
+          - --dapr-http-port={{ .Values.ambient.daprd.httpPort }}
+          - --dapr-grpc-port={{ .Values.ambient.daprd.grpcPort }}
+          - --dapr-internal-grpc-port={{ .Values.ambient.daprd.internalGrpcPort }}
+          - --dapr-listen-addresses={{ .Values.ambient.daprd.listenAddresses }}
+          - --dapr-public-port={{ .Values.ambient.daprd.publicPort }}
+          - --app-id={{ required ".Values.ambient.appId is required" .Values.ambient.appId }}
+          - --app-port={{ required ".Values.ambient.daprd.app.port is required" .Values.ambient.daprd.app.port }}
+          - --app-protocol={{ required ".Values.ambient.daprd.app.protocol is required" .Values.ambient.daprd.app.protocol }}
+          - --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.ambient.controlPlane.operatorAddress }}
+          - --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.ambient.controlPlane.placementServerAddress }}
+          - --sentry-address={{ default "dapr-sentry.dapr-system.svc.cluster.local" .Values.ambient.controlPlane.sentryAddress }}
+          - --enable-metrics={{ .Values.ambient.daprd.metrics.enabled }}
+          - --metrics-port={{ .Values.ambient.daprd.metrics.port }}
+          - --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
+          - --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
+          - --app-channel-address={{ .Values.ambient.channelAddress }}
           env:
           - name: DAPR_TRUST_ANCHORS
             valueFrom:

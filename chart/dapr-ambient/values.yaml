@@ -1,6 +1,4 @@
 ambient:
-  appId: ""
-  channelAddress: ""
   strategy: daemonset
   deployment:
     replicas: 1
