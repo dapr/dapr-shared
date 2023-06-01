@@ -1,5 +1,6 @@
 ambient:
   appId: ""
+  channelAddress: ""
   strategy: daemonset
   deployment:
     replicas: 1
@@ -17,13 +18,13 @@ ambient:
   initContainer:
     token: ""
     image:  
-      registry: "docker.io/salaboy"
+      registry: "docker.io/matheuscruzdev"
       name: dapr-ambient
       tag: latest
       pullPolicy: Always
   daprd:
     app: 
-      port: 8080
+      port: 80
       protocol: "http"
     token: ""
     httpPort: 3500
@@ -34,7 +35,7 @@ ambient:
     image:
       registry: "docker.io/daprio"
       name: daprd
-      tag: 1.11.0-rc.5
+      tag: 1.11.0-rc.7
       pullPolicy: Always
     metrics:
       enabled: true
