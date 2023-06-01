@@ -18,47 +18,19 @@
       serviceAccountName: {{ include "dapr-ambient.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: setup-trust-bundle
+          image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
       containers:
-        - name: {{ .Chart.Name }}-proxy
-          image: "{{ .Values.ambient.proxy.image.registry }}/{{ .Values.ambient.proxy.image.name }}:{{ .Values.ambient.proxy.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.ambient.proxy.image.pullPolicy }}
-          volumeMounts:
-          - name: shared-data
-            mountPath: /shared
-          env: 
-          - name: AMBIENT_PROXY_PORT
-            value: "{{ default "8080" .Values.ambient.proxy.port }}"
-          - name: AMBIENT_APP_REMOTE_URL
-            value: "{{ required ".Values.ambient.proxy.remoteURL is required" .Values.ambient.proxy.remoteURL }}"
-          - name: DAPR_CONTROL_PLANE_NAMESPACE
-            value: "{{ default "dapr-system" .Values.ambient.controlPlane.namespace }}"  
-          ports:
-          - containerPort: 8080
-          livenessProbe:
-            httpGet:
-              path: /health/liveness
-              port: 8080
-          readinessProbe:
-            httpGet:
-              path: /health/readiness
-              port: 8080  
         - name: daprd
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.ambient.daprd.image.registry }}/{{ .Values.ambient.daprd.image.name }}:{{ .Values.ambient.daprd.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.ambient.daprd.image.pullPolicy }}
-          volumeMounts:
-          - name: shared-data
-            mountPath: /shared
-          command: ['/bin/sh', "-c"]
+          command: ['./daprd']
           args:
           - 
-            echo "Waiting dapr-ambient...";
-            sleep 10s;
-            export DAPR_TRUST_ANCHORS=`cat /shared/DAPR_TRUST_ANCHORS`;
-            export DAPR_CERT_CHAIN=`cat /shared/DAPR_CERT_CHAIN`;
-            export DAPR_CERT_KEY=`cat /shared/DAPR_CERT_KEY`;
-            ./daprd --mode=kubernetes 
+            --mode=kubernetes 
                   --log-level={{ .Values.ambient.log.level }}
                   --log-as-json={{ .Values.ambient.log.json }}
                   --dapr-http-port={{ .Values.ambient.daprd.httpPort }}
@@ -76,8 +48,23 @@
                   --metrics-port={{ .Values.ambient.daprd.metrics.port }}
                   --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
                   --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
-                  --app-channel-address="{{ .Values.ambient.proxy.remoteURL }}";
+                  --app-channel-address="{{ .Values.ambient.channelAddress }}";
           env:
+          - name: DAPR_TRUST_ANCHORS
+            valueFrom:
+              configMapKeyRef:
+                name: dapr-ambient-configmap
+                key: dapr-trust-anchors
+          - name: DAPR_CERT_CHAIN
+            valueFrom:
+              configMapKeyRef:
+                name: dapr-ambient-configmap
+                key: dapr-cert-chain
+          - name: DAPR_CERT_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: dapr-ambient-configmap
+                key: dapr-cert-key
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}
           - name: DAPR_API_TOKEN
