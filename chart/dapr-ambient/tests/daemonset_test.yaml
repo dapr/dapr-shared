@@ -25,7 +25,7 @@ tests:
       ambient.appId: appId
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
+          path: spec.template.spec.containers[0].args[9]
           pattern: --app-id=[appId]+
 
   - it: should set tolerations
@@ -144,72 +144,66 @@ tests:
       - ../values.yaml
       - ./values/required.yaml
     asserts:
-      - matchRegex:
+      - equal:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^--mode=kubernetes --log-level=info --log-as-json=true --dapr-http-port=3500 --dapr-grpc-port=50001
-              --dapr-internal-grpc-port=50002 --dapr-listen-addresses=0.0.0.0 --dapr-public-port=3501
-              --app-id=appId --app-port="80" --app-protocol="http" --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
-              --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
-              --sentry-address= --enable-metrics=true --metrics-port=9090 --enable-mtls=false
-              --enable-api-logging=true
-              --app-channel-address="https://local";$
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--log-level=info\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--log-as-json=true\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--dapr-http-port=3500\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--dapr-grpc-port=50001\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--dapr-internal-grpc-port=50002\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--dapr-listen-addresses=0.0.0.0\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--dapr-public-port=3501\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--app-id=appId\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--app-port="80"\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--app-protocol="http"\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--control-plane-address=dapr-api.dapr-system.svc.cluster.local:80\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--sentry-address=\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--app-protocol="http"\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--enable-metrics=true\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--metrics-port=9090\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--enable-mtls=false\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--enable-api-logging=true\s
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--app-channel-address="https://local";$
+          value: /daprd
+      - equal:
+          path: spec.template.spec.containers[0].args[1]
+          value: --mode=kubernetes 
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --log-level=info
+      - equal:
+          path: spec.template.spec.containers[0].args[3]
+          value: --log-as-json=true
+      - equal:
+          path: spec.template.spec.containers[0].args[4]
+          value: --dapr-http-port=3500
+      - equal:
+          path: spec.template.spec.containers[0].args[5]
+          value: --dapr-grpc-port=50001
+      - equal:
+          path: spec.template.spec.containers[0].args[6]
+          value: --dapr-internal-grpc-port=50002
+      - equal:
+          path: spec.template.spec.containers[0].args[7]
+          value: --dapr-listen-addresses=0.0.0.0
+      - equal:
+          path: spec.template.spec.containers[0].args[8]
+          value: --dapr-public-port=3501
+      - equal:
+          path: spec.template.spec.containers[0].args[9]
+          value: --app-id=appId
+      - equal:
+          path: spec.template.spec.containers[0].args[10]
+          value: --app-port=80
+      - equal:
+          path: spec.template.spec.containers[0].args[11]
+          value: --app-protocol=http
+      - equal:
+          path: spec.template.spec.containers[0].args[12]
+          value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
+      - equal:
+          path: spec.template.spec.containers[0].args[13]
+          value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
+      - equal:
+          path: spec.template.spec.containers[0].args[14]
+          value: --sentry-address=dapr-sentry.dapr-system.svc.cluster.local
+      - equal:
+          path: spec.template.spec.containers[0].args[15]
+          value: --enable-metrics=true
+      - equal:
+          path: spec.template.spec.containers[0].args[16]
+          value: --metrics-port=9090
+      - equal:
+          path: spec.template.spec.containers[0].args[17]
+          value: --enable-mtls=false
+      - equal:
+          path: spec.template.spec.containers[0].args[18]
+          value: --enable-api-logging=true
+      - equal:
+          path: spec.template.spec.containers[0].args[19]
+          value: --app-channel-address=https://local
 
   - it: should fail when ambient.daprd.app.port is empty
     values:
@@ -238,9 +232,9 @@ tests:
     set:
       ambient.controlPlane.operatorAddress: 
     asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--control-plane-address=dapr-api.dapr-system.svc.cluster.local:80\s
+      - equal:
+          path: spec.template.spec.containers[0].args[12]
+          value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
    
   - it: should set --control-plane-address=control.plane.address:80 when ambient.controlPlane.operatorAddress is equal to control.plane.address:80
     values:
@@ -249,9 +243,9 @@ tests:
     set:
       ambient.controlPlane.operatorAddress: control.plane.address:80
     asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--control-plane-address=control.plane.address:80\s
+      - equal:
+          path: spec.template.spec.containers[0].args[12]
+          value: --control-plane-address=control.plane.address:80
 
   - it: |
       should set --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005 
@@ -262,9 +256,9 @@ tests:
     set:
       ambient.controlPlane.operatorAddress: 
     asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005\s
+      - equal:
+          path: spec.template.spec.containers[0].args[13]
+          value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
    
   - it: |
       should set --placement-host-address=placement.host.address:80 
@@ -275,9 +269,9 @@ tests:
     set:
       ambient.controlPlane.operatorAddress: control.plane.address:80
     asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: \s--control-plane-address=control.plane.address:80\s
+      - equal:
+          path: spec.template.spec.containers[0].args[12]
+          value: --control-plane-address=control.plane.address:80
   
   - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
     values:
