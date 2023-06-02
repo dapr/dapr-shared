@@ -23,7 +23,7 @@ ambient:
       tag: latest
       pullPolicy: Always
   daprd:
-    app: 
+    app:
       protocol: "http"
     token: ""
     httpPort: 3500
