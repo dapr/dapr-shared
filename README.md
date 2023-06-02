@@ -26,7 +26,7 @@ If you want to take a look at a step by step tutorial using some applications an
 To deploy this chart from source you can run from inside the `chart/dapr-ambient` directory: 
 
 ```
-helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.channelAddress=<REMOTE_URL>  
+helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL>  
 
 ```
 

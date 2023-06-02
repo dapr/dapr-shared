@@ -133,7 +133,7 @@ helm repo update
 Then install Dapr Ambient Helm Chart running this:
 
 ```sh
-  helm install my-ambient-dapr-ambient ambient/dapr-ambient --set ambient.appId=my-dapr-app --set ambient.channelAddress=subscriber-svc:8080
+  helm install my-ambient-dapr-ambient ambient/dapr-ambient --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc
 ```
 
 Now that we have the Dapr control plane, Redis, the PubSub and StateStore component and our Dapr Ambient instance let's deploy the example apps:
