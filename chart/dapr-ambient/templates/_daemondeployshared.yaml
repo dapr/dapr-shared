@@ -21,6 +21,8 @@
       initContainers:
         - name: ambient-init-container
           image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
+          args:
+            - --config-map-name={{ .Values.ambient.configMapName }}
       containers:
         - name: daprd
           securityContext:
@@ -52,17 +54,17 @@
           - name: DAPR_TRUST_ANCHORS
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Values.ambient.configMapName }}
                 key: dapr-trust-anchors
           - name: DAPR_CERT_CHAIN
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Values.ambient.configMapName }}
                 key: dapr-cert-chain
           - name: DAPR_CERT_KEY
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Values.ambient.configMapName }}
                 key: dapr-cert-key
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}

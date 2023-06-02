@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -15,7 +16,6 @@ import (
 )
 
 const (
-	configMapName                  string = "dapr-ambient-configmap"
 	daprTrustAnchorsConfigMapKey   string = "dapr-trust-anchors"
 	daprTrustCertChainConfigMapKey string = "dapr-cert-chain"
 	daprTrustCertKeyConfigMapKey   string = "dapr-cert-key"
@@ -24,8 +24,14 @@ const (
 	DaprControlPlaneNamespace      string = "DAPR_CONTROL_PLANE_NAMESPACE"
 )
 
+var configMapName *string
+
 func main() {
 	log.Println("executing dapr-ambient-init")
+
+	configMapName := flag.String("config-map-name", "dapr-ambient-configmap", "--config-map-name=value")
+	flag.Parse()
+	log.Println("config map name: ", *configMapName)
 
 	ctx := context.Background()
 
@@ -37,7 +43,7 @@ func main() {
 
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
+			Name:      *configMapName,
 			Namespace: namespaceDefault,
 		},
 		Data: map[string]string{
@@ -47,9 +53,10 @@ func main() {
 		},
 	}
 
-	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, configMapName, metav1.GetOptions{})
+	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, *configMapName, metav1.GetOptions{})
 	if err == nil {
-		log.Println(fmt.Printf("configmap %s already exists", configMapName))
+		log.Println(fmt.Printf("configmap %s already exists", *configMapName))
+		return
 	}
 
 	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})

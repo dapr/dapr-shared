@@ -1,5 +1,7 @@
 ambient:
   strategy: daemonset
+  configMapName: dapr-ambient-configmap
+  remotePort: 80
   deployment:
     replicas: 1
   log: 
@@ -22,7 +24,6 @@ ambient:
       pullPolicy: Always
   daprd:
     app: 
-      port: 80
       protocol: "http"
     token: ""
     httpPort: 3500
