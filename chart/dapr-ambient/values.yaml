@@ -22,7 +22,7 @@ ambient:
       pullPolicy: Always
   daprd:
     app: 
-      port: 80
+      port: 0
       protocol: "http"
     token: ""
     httpPort: 3500
