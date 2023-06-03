@@ -55,8 +55,7 @@ func main() {
 
 	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, *configMapName, metav1.GetOptions{})
 	if err == nil {
-		log.Println(fmt.Printf("configmap %s already exists", *configMapName))
-		return
+		panic(fmt.Errorf("configmap %s already exists", *configMapName))
 	}
 
 	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})
