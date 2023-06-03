@@ -29,7 +29,7 @@ var configMapName *string
 func main() {
 	log.Println("executing dapr-ambient-init")
 
-	configMapName := flag.String("config-map-name", "dapr-ambient-configmap", "--config-map-name=value")
+	configMapName := flag.String("config-map", "dapr-ambient-configmap", "--config-map=value")
 	flag.Parse()
 	log.Println("config map name: ", *configMapName)
 
