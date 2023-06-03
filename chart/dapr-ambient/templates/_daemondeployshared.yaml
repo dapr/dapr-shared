@@ -22,6 +22,7 @@
         - name: ambient-init-container
           image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
           args:
+            - init
             - --config-map={{ .Values.ambient.configMapName }}
       containers:
         - name: daprd
