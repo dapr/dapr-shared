@@ -15,7 +15,7 @@ If you want to get started with Dapr Ambient you can easily create a new Dapr Am
 ```
 helm add repo ambient https://salaboy.github.io/helm/
 helm repo update
-helm install my-ambient amabient/dapr-ambient  --set ambient.appId=<DAPR_APP_ID> --set ambient.channelAddress=<REMOTE_URL> --set ambient.daprd.app.port=<REMOTE_PORT> 
+helm install my-ambient amabient/dapr-ambient  --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL> --set ambient.remotePort=<REMOTE_PORT> 
 ```
 
 If you want to take a look at a step by step tutorial using some applications and interacting with Dapr Components check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
