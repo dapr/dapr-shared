@@ -176,7 +176,7 @@ tests:
           value: --app-id=appId
       - equal:
           path: spec.template.spec.containers[0].args[10]
-          value: --app-port=80
+          value: --app-port=0
       - equal:
           path: spec.template.spec.containers[0].args[11]
           value: --app-protocol=http
