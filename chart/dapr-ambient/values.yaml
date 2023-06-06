@@ -1,6 +1,5 @@
 ambient:
   strategy: daemonset
-  configMapName: dapr-ambient-configmap
   remotePort: 0
   deployment:
     replicas: 1

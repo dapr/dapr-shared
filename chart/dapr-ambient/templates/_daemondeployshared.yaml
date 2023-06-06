@@ -23,7 +23,7 @@
           image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
           args:
             - init
-            - --config-map={{ .Values.ambient.configMapName }}
+            - --config-map={{ .Release.name }}-cm
       containers:
         - name: daprd
           securityContext:
@@ -55,17 +55,17 @@
           - name: DAPR_TRUST_ANCHORS
             valueFrom:
               configMapKeyRef:
-                name: {{ .Values.ambient.configMapName }}
+                name: {{ .Release.name }}-cm
                 key: dapr-trust-anchors
           - name: DAPR_CERT_CHAIN
             valueFrom:
               configMapKeyRef:
-                name: {{ .Values.ambient.configMapName }}
+                name: {{ .Release.name }}-cm
                 key: dapr-cert-chain
           - name: DAPR_CERT_KEY
             valueFrom:
               configMapKeyRef:
-                name: {{ .Values.ambient.configMapName }}
+                name: {{ .Release.name }}-cm
                 key: dapr-cert-key
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}
