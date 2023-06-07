@@ -15,8 +15,11 @@ ambient:
     # -- Namespace where Dapr Control Plane is.
     namespace: "dapr-system"
   serviceAccount: 
+    # -- Allows the option to create or not the service account.
     create: true 
+    # -- Kubernetes Service Account name.
     name: ""
+    # Kubernetes Service Account annotations.
     annotations: {}
   service:
     # -- The daprd service type.
