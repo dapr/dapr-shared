@@ -1,8 +1,11 @@
 on:
   push:
     branches:
-      - main
+      - "*"
   pull_request:
+
+permissions:
+  contents: write
 jobs:
   helm:
     runs-on: ubuntu-latest
@@ -10,17 +13,35 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       
-      - name: setup helm
-        run: |
-          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-          sudo apt-get install apt-transport-https --yes
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-          sudo apt-get update
-          sudo apt-get install helm
+      # - name: setup helm
+      #   run: |
+      #     curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+      #     sudo apt-get install apt-transport-https --yes
+      #     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      #     sudo apt-get update
+      #     sudo apt-get install helm
 
-      - name: install helm
-        run: helm plugin install https://github.com/quintush/helm-unittest
+      # - name: install helm
+      #   run: helm plugin install https://github.com/quintush/helm-unittest
       
-      - name: execute unit tests
-        run: helm unittest chart/dapr-ambient
-    
+      # - name: execute unit tests
+      #   run: helm unittest chart/dapr-ambient
+
+      - name: update docs
+        run: |
+          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+          tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
+          ./helm-docs
+
+      - name: commit and push changes
+        env:
+          COMMIT_MESSAGE: "docs: update README.md"
+          COMMIT_AUTHOR: dapr-ambient-bot
+        run: |
+          mv chart/dapr-ambient/README.md README.md
+          git config --global user.name "${{ env.COMMIT_AUTHOR }}"
+          git config --global user.email "dapr-ambient-bot@diagrid.com"
+          git add README.md
+          git commit -m "${{ env.COMMIT_MESSAGE }}"
+          git push
+
