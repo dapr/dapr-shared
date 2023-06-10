@@ -14,14 +14,14 @@ tests:
 
   - it: should fail if ambient.appId is not defined
     set:
-      ambient.channelAddress: https://local
+      ambient.remoteURL: https://local
     asserts:
       - failedTemplate:
           errorMessage: .Values.ambient.appId is required
 
   - it: should not fail if ambient.appId is defined
     set:
-      ambient.channelAddress: https://local
+      ambient.remoteURL: https://local
       ambient.appId: appId
     asserts:
       - matchRegex:
@@ -176,7 +176,7 @@ tests:
           value: --app-id=appId
       - equal:
           path: spec.template.spec.containers[0].args[10]
-          value: --app-port=80
+          value: --app-port=0
       - equal:
           path: spec.template.spec.containers[0].args[11]
           value: --app-protocol=http
@@ -205,15 +205,15 @@ tests:
           path: spec.template.spec.containers[0].args[19]
           value: --app-channel-address=https://local
 
-  - it: should fail when ambient.daprd.app.port is empty
+  - it: should fail when ambient.remotePort is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.daprd.app.port:
+      ambient.remotePort:
     asserts:
       - failedTemplate:
-          errorMessage: .Values.ambient.daprd.app.port is required
+          errorMessage: .Values.ambient.remotePort is required
 
   - it: should fail when ambient.daprd.app.protocol is empty
     values:

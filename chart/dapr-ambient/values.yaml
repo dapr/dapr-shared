@@ -1,5 +1,6 @@
 ambient:
   strategy: daemonset
+  remotePort: 0
   deployment:
     replicas: 1
   log: 
@@ -21,8 +22,7 @@ ambient:
       tag: latest
       pullPolicy: Always
   daprd:
-    app: 
-      port: 0
+    app:
       protocol: "http"
     token: ""
     httpPort: 3500

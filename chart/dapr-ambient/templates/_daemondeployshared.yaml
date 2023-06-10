@@ -19,8 +19,11 @@
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-        - name: setup-trust-bundle
+        - name: ambient-init-container
           image: "{{ .Values.ambient.initContainer.image.registry }}/{{ .Values.ambient.initContainer.image.name }}:{{ .Values.ambient.initContainer.image.tag }}"
+          args:
+            - init
+            - --config-map={{ .Release.name }}-cm
       containers:
         - name: daprd
           securityContext:
@@ -38,7 +41,7 @@
           - --dapr-listen-addresses={{ .Values.ambient.daprd.listenAddresses }}
           - --dapr-public-port={{ .Values.ambient.daprd.publicPort }}
           - --app-id={{ required ".Values.ambient.appId is required" .Values.ambient.appId }}
-          - --app-port={{ required ".Values.ambient.daprd.app.port is required" .Values.ambient.daprd.app.port }}
+          - --app-port={{ required ".Values.ambient.remotePort is required" .Values.ambient.remotePort }}
           - --app-protocol={{ required ".Values.ambient.daprd.app.protocol is required" .Values.ambient.daprd.app.protocol }}
           - --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.ambient.controlPlane.operatorAddress }}
           - --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.ambient.controlPlane.placementServerAddress }}
@@ -47,22 +50,22 @@
           - --metrics-port={{ .Values.ambient.daprd.metrics.port }}
           - --enable-mtls={{ .Values.ambient.daprd.mtls.enabled }}
           - --enable-api-logging={{ .Values.ambient.daprd.apiLogging.enabled }}
-          - --app-channel-address={{ .Values.ambient.channelAddress }}
+          - --app-channel-address={{ .Values.ambient.remoteURL }}
           env:
           - name: DAPR_TRUST_ANCHORS
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Release.name }}-cm
                 key: dapr-trust-anchors
           - name: DAPR_CERT_CHAIN
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Release.name }}-cm
                 key: dapr-cert-chain
           - name: DAPR_CERT_KEY
             valueFrom:
               configMapKeyRef:
-                name: dapr-ambient-configmap
+                name: {{ .Release.name }}-cm
                 key: dapr-cert-key
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.ambient.controlPlane.namespace }}
