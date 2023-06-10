@@ -28,12 +28,14 @@ jobs:
         run: helm unittest chart/dapr-ambient
 
       - name: update docs
+        if: github.ref == 'refs/heads/main'
         run: |
           wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
           tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
           ./helm-docs
 
       - name: commit and push changes
+        if: github.ref == 'refs/heads/main'
         env:
           COMMIT_MESSAGE: "docs: update README.md"
           COMMIT_AUTHOR: dapr-ambient-bot
