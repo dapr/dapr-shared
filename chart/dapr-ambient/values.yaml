@@ -58,7 +58,7 @@ ambient:
       # -- Daprd image.
       name: daprd
       # -- Daprd image version.
-      tag: 1.11.0-rc.7
+      tag: 1.11.0
       # -- Daprd image pull policy.
       pullPolicy: Always
     metrics:
