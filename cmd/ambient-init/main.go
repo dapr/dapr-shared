@@ -8,6 +8,7 @@ import (
 
 	"github.com/dapr/dapr/pkg/injector/sidecar"
 	daprutils "github.com/dapr/dapr/utils"
+	"github.com/spf13/cobra"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,7 +16,6 @@ import (
 )
 
 const (
-	configMapName                  string = "dapr-ambient-configmap"
 	daprTrustAnchorsConfigMapKey   string = "dapr-trust-anchors"
 	daprTrustCertChainConfigMapKey string = "dapr-cert-chain"
 	daprTrustCertKeyConfigMapKey   string = "dapr-cert-key"
@@ -24,38 +24,12 @@ const (
 	DaprControlPlaneNamespace      string = "DAPR_CONTROL_PLANE_NAMESPACE"
 )
 
+var configMapName string
+
 func main() {
 	log.Println("executing dapr-ambient-init")
-
-	ctx := context.Background()
-
-	kubeClient := daprutils.GetKubeClient()
-
-	c := NewDaprSidecarClient(kubeClient)
-
-	rootCert, certChain, certKey := c.Get(ctx, LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace))
-
-	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: namespaceDefault,
-		},
-		Data: map[string]string{
-			daprTrustAnchorsConfigMapKey:   rootCert,
-			daprTrustCertChainConfigMapKey: certChain,
-			daprTrustCertKeyConfigMapKey:   certKey,
-		},
-	}
-
-	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, configMapName, metav1.GetOptions{})
-	if err == nil {
-		log.Println(fmt.Printf("configmap %s already exists", configMapName))
-	}
-
-	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})
-	if err != nil {
-		panic(err)
-	}
+	rootCmd := NewRootCmd()
+	rootCmd.Execute()
 }
 
 // LookupEnvOrString tries to look for an environment variable, if found, return it, otherwise find,
@@ -87,4 +61,88 @@ func NewDaprSidecarClient(cs *kubernetes.Clientset) DaprSidecarClient {
 func (s *daprSidecarClient) Get(ctx context.Context, ns string) (string, string, string) {
 	daprCPNamespace := LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace)
 	return sidecar.GetTrustAnchorsAndCertChain(ctx, s.Clientset, daprCPNamespace)
+}
+
+// NewRootCmd
+func NewRootCmd() *cobra.Command {
+
+	rootCmd := &cobra.Command{
+		Use: "ambient-init",
+	}
+	rootCmd.AddCommand(NewInitCmd())
+	rootCmd.AddCommand(NewRemoveCmd())
+	return rootCmd
+}
+
+// NewInitCmd creates a new *cobra.Command for init command.
+func NewInitCmd() *cobra.Command {
+	initCmd := &cobra.Command{
+		Use: "init",
+		Run: func(cmd *cobra.Command, args []string) {
+			InitHandler()
+		},
+	}
+
+	initCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-ambient-configmap", "--config-map=value")
+	_ = initCmd.MarkPersistentFlagRequired("config-map")
+
+	return initCmd
+}
+
+// NewRemoveCmd creates a new *cobra.Command for remove command.
+func NewRemoveCmd() *cobra.Command {
+	removeCmd := &cobra.Command{
+		Use: "remove",
+		Run: func(cmd *cobra.Command, args []string) {
+			RemoveHandler()
+		},
+	}
+
+	removeCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-ambient-configmap", "--config-map=value")
+	_ = removeCmd.MarkPersistentFlagRequired("config-map")
+
+	return removeCmd
+}
+
+// InitHandler handles the init command.
+func InitHandler() {
+	ctx := context.Background()
+
+	kubeClient := daprutils.GetKubeClient()
+
+	c := NewDaprSidecarClient(kubeClient)
+
+	rootCert, certChain, certKey := c.Get(ctx, LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace))
+
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: namespaceDefault,
+		},
+		Data: map[string]string{
+			daprTrustAnchorsConfigMapKey:   rootCert,
+			daprTrustCertChainConfigMapKey: certChain,
+			daprTrustCertKeyConfigMapKey:   certKey,
+		},
+	}
+
+	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, configMapName, metav1.GetOptions{})
+	if err == nil {
+		panic(fmt.Errorf("configmap %s already exists", configMapName))
+	}
+
+	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// RemoveHandler handles remove command.
+func RemoveHandler() {
+	ctx := context.Background()
+	kubeClient := daprutils.GetKubeClient()
+	err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Delete(ctx, configMapName, metav1.DeleteOptions{})
+	if err != nil {
+		panic(err)
+	}
 }

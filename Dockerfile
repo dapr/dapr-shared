@@ -1,5 +1,5 @@
-FROM busybox:latest
+FROM busybox:1.34
 
-COPY main main
+COPY ambient-init ambient-init
 
-ENTRYPOINT [ "./main" ]
+ENTRYPOINT [ "./ambient-init" ]
