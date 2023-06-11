@@ -13,7 +13,7 @@ If you want to get started with Dapr Ambient you can easily create a new Dapr Am
 ```
 helm add repo ambient https://salaboy.github.io/helm/
 helm repo update
-helm install my-ambient amabient/dapr-ambient  --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL> --set ambient.remotePort=<REMOTE_PORT> 
+helm install my-ambient amabient/dapr-ambient  --set ambient.appId=<DAPR_APP_ID> --set ambient.channelAddress=<REMOTE_URL> --set ambient.daprd.app.port=<REMOTE_PORT>
 ```
 
 If you want to take a look at a step by step tutorial using some applications and interacting with Dapr Components check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
@@ -23,7 +23,7 @@ If you want to take a look at a step by step tutorial using some applications an
 To deploy this chart from source you can run from inside the `chart/dapr-ambient` directory:
 
 ```
-helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL>  
+helm install my-ambient . --set ambient.appId=<DAPR_APP_ID> --set ambient.channelAddress=<REMOTE_URL> 
 
 ```
 
@@ -48,7 +48,7 @@ Is possible to customize Dapr Ambient using custom Helm values.
 | ambient.daprd.image.name | string | `"daprd"` | Daprd image. |
 | ambient.daprd.image.pullPolicy | string | `"Always"` | Daprd image pull policy. |
 | ambient.daprd.image.registry | string | `"docker.io/daprio"` | Daprd image registry. |
-| ambient.daprd.image.tag | string | `"1.11.0-rc.7"` | Daprd image version. |
+| ambient.daprd.image.tag | string | `"1.11.0"` | Daprd image version. |
 | ambient.daprd.internalGrpcPort | int | `50002` | gRPC port for the Dapr Internal API to listen on. |
 | ambient.daprd.listenAddresses | string | `"0.0.0.0"` | Comma separated list of IP addresses that daprd will listen to. Defaults to all in standalone mode. Defaults to [::1],127.0.0.1 in Kubernetes. To listen to all IPv4 addresses, use 0.0.0.0. To listen to all IPv6 addresses, use [::]. |
 | ambient.daprd.metrics.enabled | bool | `true` | Enable prometheus metric. |
@@ -67,8 +67,8 @@ Is possible to customize Dapr Ambient using custom Helm values.
 | ambient.remotePort | int | `0` | The remote port. |
 | ambient.service.type | string | `"ClusterIP"` | The daprd service type. |
 | ambient.serviceAccount.annotations | object | `{}` |  |
-| ambient.serviceAccount.create | bool | `true` |  |
-| ambient.serviceAccount.name | string | `""` |  |
+| ambient.serviceAccount.create | bool | `true` | Allows the option to create or not the service account. |
+| ambient.serviceAccount.name | string | `""` | Kubernetes Service Account name. |
 | ambient.strategy | string | `"daemonset"` | The default strategy to run dapr in ambient mode. Possible values `daemonset`, `deployment`. |
 
 ----------------------------------------------
