@@ -1,56 +1,92 @@
 ambient:
+  # -- The default strategy to run dapr in ambient mode. Possible values `daemonset`, `deployment`.
   strategy: daemonset
+  # -- The remote port.
   remotePort: 0
   deployment:
+    # -- The quantity of replicas. This property is set only when `ambient.strategy` is equal to `deployment`
     replicas: 1
-  log: 
+  log:
+    # -- The daprd log level.
     level: info
+    # -- The daprd log format.
     json: true
-  controlPlane: 
+  controlPlane:
+    # -- Namespace where Dapr Control Plane is.
     namespace: "dapr-system"
   serviceAccount: 
+    # -- Allows the option to create or not the service account.
     create: true 
+    # -- Kubernetes Service Account name.
     name: ""
+    # Kubernetes Service Account annotations.
     annotations: {}
-  service: 
+  service:
+    # -- The daprd service type.
     type: "ClusterIP"  
   initContainer:
+    # -- The dapr API token.
     token: ""
     image:  
+      # -- The dapr-ambient image registry.
       registry: "docker.io/matheuscruzdev"
+      # -- The dapr-ambient image name.
       name: dapr-ambient
+      # -- The dapr-ambient-init image tag.
       tag: latest
+      # -- The init container pull policy.
       pullPolicy: Always
   daprd:
     app:
+      # -- Dapr which protocol your application is using. Valid options are `http`` and `grpc``.
       protocol: "http"
+    # -- Dapr API token to use for token based API authentication.
     token: ""
+    # -- The HTTP port for the Dapr API.
     httpPort: 3500
+    # -- gRPC port for the Dapr Internal API to listen on.
     grpcPort: 50001
+    # -- gRPC port for the Dapr Internal API to listen on.
     internalGrpcPort: 50002
+    # -- The HTTP public port for the Dapr API.
     publicPort: 3501
+    # -- Comma separated list of IP addresses that daprd will listen to. Defaults to all in standalone mode. Defaults to [::1],127.0.0.1 in Kubernetes. To listen to all IPv4 addresses, use 0.0.0.0. To listen to all IPv6 addresses, use [::].
     listenAddresses: "0.0.0.0" 
     image:
+      # -- Daprd image registry.
       registry: "docker.io/daprio"
+      # -- Daprd image.
       name: daprd
-      tag: 1.11.0-rc.7
+      # -- Daprd image version.
+      tag: 1.11.0
+      # -- Daprd image pull policy.
       pullPolicy: Always
     metrics:
+      # -- Enable prometheus metric.
       enabled: true
+      # -- Sets the port for the sidecar metrics server.
       port: 9090
     mtls:
+      # -- Enables automatic mTLS for daprd to daprd communication channels.
       enabled: false
     apiLogging:
+      # -- Enables API logging for the daprd.
       enabled: true  
-
+# @ignored
 tolerations: 
   # these tolerations are to have the daemonset runnable on control plane nodes
   # remove them if your control plane nodes should not run pods
+  # @ignored
   - key: node-role.kubernetes.io/control-plane
+    # @ignored
     operator: Exists
+    # @ignored
     effect: NoSchedule
+  # @ignored
   - key: node-role.kubernetes.io/master
+    # @ignored
     operator: Exists
+    # @ignored
     effect: NoSchedule
-
+# @ignored
 affinity: {}

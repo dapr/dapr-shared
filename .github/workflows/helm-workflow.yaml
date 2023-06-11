@@ -3,6 +3,9 @@ on:
     branches:
       - main
   pull_request:
+
+permissions:
+  contents: write
 jobs:
   helm:
     runs-on: ubuntu-latest
@@ -23,4 +26,24 @@ jobs:
       
       - name: execute unit tests
         run: helm unittest chart/dapr-ambient
-    
+
+      - name: update docs
+        if: github.ref == 'refs/heads/main'
+        run: |
+          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+          tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
+          ./helm-docs
+
+      - name: commit and push changes
+        if: github.ref == 'refs/heads/main'
+        env:
+          COMMIT_MESSAGE: "docs: update README.md"
+          COMMIT_AUTHOR: dapr-ambient-bot
+        run: |
+          mv chart/dapr-ambient/README.md README.md
+          git config --global user.name "${{ env.COMMIT_AUTHOR }}"
+          git config --global user.email "dapr-ambient-bot@diagrid.com"
+          git add README.md
+          git commit -m "${{ env.COMMIT_MESSAGE }}"
+          git push origin ${{ github.head_ref || github.ref_name }}
+
