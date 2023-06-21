@@ -48,19 +48,19 @@ jobs:
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
       - name: Update Helm chart files for release version ${{ env.REL_VERSION }}
         run: bash ./.github/scripts/set_helm_dapr_version.sh
-    #   - name: Generate Helm chart manifest
-    #     if: env.DOCKER_REGISTRY != ''
-    #     env:
-    #       DAPR_REGISTRY: ${{ env.DOCKER_REGISTRY }}
-    #       DAPR_TAG: ${{ env.REL_VERSION }}
-    #     run: |
-    #       make manifest-gen
-    #     shell: bash
-    #   - name: Move Helm chart manifest to artifact
-    #     if: env.DOCKER_REGISTRY != ''
-    #     run: |
-    #       mkdir -p ${{ env.ARTIFACT_DIR }}
-    #       mv ./dist/install/dapr.yaml ${{ env.ARTIFACT_DIR }}/dapr-operator.yaml
+      - name: Generate Helm chart manifest
+        if: env.DOCKER_REGISTRY != ''
+        env:
+          DAPR_REGISTRY: ${{ env.DOCKER_REGISTRY }}
+          DAPR_TAG: ${{ env.REL_VERSION }}
+        run: |
+          make manifest-gen
+        shell: bash
+      - name: Move Helm chart manifest to artifact
+        if: env.DOCKER_REGISTRY != ''
+        run: |
+          mkdir -p ${{ env.ARTIFACT_DIR }}
+          mv ./dist/install/dapr.yaml ${{ env.ARTIFACT_DIR }}/dapr-operator.yaml
       - name: Save release version
         run: |
           mkdir -p ${{ env.ARTIFACT_DIR }}/${{ env.HELM_PACKAGE_DIR }}
