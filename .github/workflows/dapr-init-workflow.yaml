@@ -96,7 +96,7 @@ jobs:
         run: |
           mkdir -p "${ARCHIVE_OUT_DIR}"
           ls
-          make release
+          make release --debug
         shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
