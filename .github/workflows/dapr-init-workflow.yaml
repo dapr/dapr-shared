@@ -66,10 +66,8 @@ jobs:
       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
       - name: Updates version
-        # if: matrix.sidecar_flavor != 'allcomponents'
         run: |
           echo "REL_VERSION=${REL_VERSION}" >>${GITHUB_ENV}
-          # Only sidecar is built
           echo "BINARIES=daprd" >>${GITHUB_ENV}
         shell: bash
       - name: Set REPO_OWNER
@@ -79,7 +77,6 @@ jobs:
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
         shell: bash
       - name: Cache Go modules (Linux)
-        if: matrix.target_os == 'linux'
         uses: actions/cache@v3
         with:
           path: |
@@ -93,7 +90,6 @@ jobs:
           GOOS: ${{ matrix.target_os }}
           GOARCH: ${{ matrix.target_arch }}
           ARCHIVE_OUT_DIR: ${{ env.ARCHIVE_OUTDIR }}
-        if: matrix.sidecar_flavor != 'allcomponents'
         run: |
           mkdir -p "${ARCHIVE_OUT_DIR}"
           make release
@@ -104,66 +100,65 @@ jobs:
           name: dapr-ambient_${{ matrix.target_os }}_${{ matrix.target_arch }}
           path: ${{ env.ARCHIVE_OUTDIR }}
 
-  # publish:
-  #   name: Publish binaries
-  #   needs: build
-  #   if: github.event_name != 'pull_request'
-  #   env:
-  #     ARTIFACT_DIR: ./release
-  #     DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out code into the Go module directory
-  #       uses: actions/checkout@v3
-  #     - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-  #       run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-  #     - name: Set REPO_OWNER
-  #       if: matrix.target_os != 'darwin'
-  #       shell: bash
-  #       run: |
-  #         REPO_OWNER=${{ github.repository_owner }}
-  #         # Lowercase the value
-  #         echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-  #     - name: "download artifact: dapr_linux_amd64_allcomponents"
-  #       uses: actions/download-artifact@master
-  #       with:
-  #         name: dapr_linux_amd64_allcomponents
-  #         path: ${{ env.ARTIFACT_DIR }}
-  #     - name: "download artifact: dapr_linux_arm_allcomponents"
-  #       uses: actions/download-artifact@master
-  #       with:
-  #         name: dapr_linux_arm_allcomponents
-  #         path: ${{ env.ARTIFACT_DIR }}
-  #     - name: generate checksum files
-  #       run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
-  #     - name: lists artifacts
-  #       run: ls -l ${{ env.ARTIFACT_DIR }}
-  #     - name: publish binaries to github
-  #       if: startswith(github.ref, 'refs/tags/v')
-  #       run: |
-  #         echo "installing github-release-cli..."
-  #         sudo npm install --silent --no-progress -g github-release-cli@2.1.0
-  #         if [ "$LATEST_RELEASE" = "true" ]; then
-  #           export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
-  #         else
-  #           export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
-  #         fi
-  #         # Get the list of files
-  #         RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
-  #         # Parse repository to get owner and repo names
-  #         OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
-  #         REPO_NAME="${GITHUB_REPOSITORY#*/}"
-  #         export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
-  #         echo "Uploading Dapr Runtime Binaries to GitHub Release"
-  #         github-release upload \
-  #           --owner $OWNER_NAME \
-  #           --repo $REPO_NAME \
-  #           --tag "v${REL_VERSION}" \
-  #           --release-name "Dapr Runtime v${REL_VERSION}" \
-  #           --body "${RELEASE_BODY}" \
-  #           --prerelease true \
-  #           ${RELEASE_ARTIFACT[*]}
-  #       shell: bash
+  publish:
+    name: Publish binaries
+    needs: build
+    if: github.event_name != 'pull_request'
+    env:
+      ARTIFACT_DIR: ./release
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+      - name: Set REPO_OWNER
+        shell: bash
+        run: |
+          REPO_OWNER=${{ github.repository_owner }}
+          # Lowercase the value
+          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+      - name: "download artifact: dapr-ambient_linux_amd64"
+        uses: actions/download-artifact@master
+        with:
+          name: dapr-ambient_linux_amd64
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: "download artifact: dapr-ambient_linux_arm64"
+        uses: actions/download-artifact@master
+        with:
+          name: dapr-ambient_linux_amd64
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: generate checksum files
+        run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
+      - name: lists artifacts
+        run: ls -l ${{ env.ARTIFACT_DIR }}
+      - name: publish binaries to github
+        if: startswith(github.ref, 'refs/tags/v')
+        run: |
+          echo "installing github-release-cli..."
+          sudo npm install --silent --no-progress -g github-release-cli@2.1.0
+          if [ "$LATEST_RELEASE" = "true" ]; then
+            export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
+          else
+            export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
+          fi
+          # Get the list of files
+          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+          # Parse repository to get owner and repo names
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
+          echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
+          github-release upload \
+            --owner $OWNER_NAME \
+            --repo $REPO_NAME \
+            --tag "v${REL_VERSION}" \
+            --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
+            --body "${RELEASE_BODY}" \
+            --prerelease true \
+            ${RELEASE_ARTIFACT[*]}
+        shell: bash
         
   docker-publish:
     name: Publish docker images
