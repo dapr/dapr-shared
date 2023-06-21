@@ -93,64 +93,16 @@ jobs:
           GOOS: ${{ matrix.target_os }}
           GOARCH: ${{ matrix.target_arch }}
           ARCHIVE_OUT_DIR: ${{ env.ARCHIVE_OUTDIR }}
+        if: matrix.sidecar_flavor != 'allcomponents'
         run: |
           mkdir -p "${ARCHIVE_OUT_DIR}"
-          ls
-          make release --debug
+          make release
         shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
           name: dapr-ambient_${{ matrix.target_os }}_${{ matrix.target_arch }}
           path: ${{ env.ARCHIVE_OUTDIR }}
-      - name: Docker Hub Login
-        if: github.event_name != 'pull_request' && env.DOCKER_REGISTRY_ID != ''
-        uses: docker/login-action@v2
-        env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-        with:
-          username: ${{ secrets.DOCKER_REGISTRY_ID }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
-      - name: GitHub Container Registry login
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images to Docker Hub
-        if: github.event_name != 'pull_request' && env.DOCKER_REGISTRY_ID != ''
-        env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-          DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-          TARGET_OS: ${{ matrix.target_os }}
-          TARGET_ARCH: ${{ matrix.target_arch }}
-          WINDOWS_VERSION: ${{ matrix.windows_version }}
-        run: |
-          echo "Build Docker images and push to Docker Hub..."
-          DAPR_TAG=${{ env.REL_VERSION }} make docker-push
-
-          # Mariner images are built only on linux/amd64 and linux/arm64
-          if [ "$TARGET_OS" = "linux" ] && [ "$TARGET_ARCH" != "arm" ]; then
-            DOCKERFILE=Dockerfile-mariner DAPR_TAG="${{ env.REL_VERSION }}-mariner" make docker-push
-          fi
-        shell: bash
-      - name: Build and push Docker images to GHCR
-        if: github.event_name != 'pull_request'
-        env:
-          DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
-          TARGET_OS: ${{ matrix.target_os }}
-          TARGET_ARCH: ${{ matrix.target_arch }}
-          WINDOWS_VERSION: ${{ matrix.windows_version }}
-        run: |
-          echo "Build Docker images and push to GHCR..."
-          DAPR_TAG=${{ env.REL_VERSION }} make docker-push
-
-          # Mariner images are built only on linux/amd64 and linux/arm64
-          if [ "$TARGET_OS" = "linux" ] && [ "$TARGET_ARCH" != "arm" ]; then
-            DOCKERFILE=Dockerfile-mariner DAPR_TAG="${{ env.REL_VERSION }}-mariner" make docker-push
-          fi
-        shell: bash
 
   # publish:
   #   name: Publish binaries
@@ -213,112 +165,71 @@ jobs:
   #           ${RELEASE_ARTIFACT[*]}
   #       shell: bash
         
-  # docker-publish:
-  #   name: Publish docker images
-  #   needs: build
-  #   if: github.event_name != 'pull_request'
-  #   env:
-  #     DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       sidecar_flavor: ["allcomponents", "stablecomponents"]
-  #       target_os: ["linux", "windows"]
-  #       exclude:
-  #         - sidecar_flavor: "stablecomponents"
-  #           target_os: "windows"
-  #   steps:
-  #     - name: Check out code into the Go module directory
-  #       uses: actions/checkout@v3
-  #     - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-  #       run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-  #     - name: Updates version for sidecar flavor
-  #       if: matrix.sidecar_flavor != 'allcomponents'
-  #       run: |
-  #         echo "REL_VERSION=${REL_VERSION}-${{matrix.sidecar_flavor}}" >>${GITHUB_ENV}
-  #         echo "LATEST_TAG=latest-${{matrix.sidecar_flavor}}" >>${GITHUB_ENV}
-  #         # We are doing image flavors only for Linux.
-  #         echo "DOCKER_MULTI_ARCH=linux-amd64 linux-arm64 linux-arm" >>${GITHUB_ENV}
-  #         # Only sidecar is built
-  #         echo "BINARIES=daprd" >>${GITHUB_ENV}
-  #       shell: bash
-  #     - name: Set REPO_OWNER
-  #       if: matrix.target_os != 'darwin'
-  #       shell: bash
-  #       run: |
-  #         REPO_OWNER=${{ github.repository_owner }}
-  #         # Lowercase the value
-  #         echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-  #     - name: Docker Hub Login
-  #       uses: docker/login-action@v2
-  #       if: env.DOCKER_REGISTRY != ''
-  #       with:
-  #         username: ${{ secrets.DOCKER_REGISTRY_ID }}
-  #         password: ${{ secrets.DOCKER_REGISTRY_PASS }}
-  #     - name: GitHub Container Registry login
-  #       uses: docker/login-action@v2
-  #       if: matrix.target_os != 'darwin'
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Build and push Docker multiarch manifest to Docker Hub
-  #       if: env.DOCKER_REGISTRY_ID != ''
-  #       env:
-  #         DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-  #         DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  #       run: |
-  #         echo "Build Docker multiarch manifest and push to Docker"
-  #         DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
+  docker-publish:
+    name: Publish docker images
+    needs: build
+    if: github.event_name != 'pull_request'
+    env:
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_os: ["linux"]
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+      - name: Updates version for sidecar flavor
+        run: |
+          echo "REL_VERSION=${REL_VERSION}" >>${GITHUB_ENV}
+          echo "LATEST_TAG=latest" >>${GITHUB_ENV}
+          # We are doing image flavors only for Linux.
+          echo "DOCKER_MULTI_ARCH=linux-amd64 linux-arm64" >>${GITHUB_ENV}
+          echo "BINARIES=daprd" >>${GITHUB_ENV}
+        shell: bash
+      - name: Set REPO_OWNER
+        shell: bash
+        run: |
+          REPO_OWNER=${{ github.repository_owner }}
+          # Lowercase the value
+          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+      - name: Docker Hub Login
+        uses: docker/login-action@v2
+        if: env.DOCKER_REGISTRY != ''
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_ID }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+      - name: GitHub Container Registry login
+        uses: docker/login-action@v2
+        if: matrix.target_os != 'darwin'
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker multiarch manifest to Docker Hub
+        if: env.DOCKER_REGISTRY_ID != ''
+        env:
+          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+          DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+        run: |
+          echo "Build Docker multiarch manifest and push to Docker"
+          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
 
-  #         # Publish the `-mariner` tag
-  #         # Mariner images are built only on linux/amd64 and linux/arm64
-  #         # Also, these use the "latest-mariner" tag if it's the latest
-  #         DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-  #         DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-  #         LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
-  #           make docker-publish
-  #       shell: bash
-  #     - name: Build and push Docker multiarch Windows manifest to Docker Hub
-  #       if: env.DOCKER_REGISTRY_ID != '' && matrix.sidecar_flavor == 'allcomponents'
-  #       env:
-  #         DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-  #         DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  #       run: |
-  #         # Publish the `-windows-amd64` manifest.
-  #         DOCKER_MULTI_ARCH="windows-1809-amd64 windows-ltsc2022-amd64" \
-  #         DAPR_TAG="${{ env.REL_VERSION }}-windows-amd64" \
-  #         LATEST_TAG=latest-windows-amd64 \
-  #         MANIFEST_TAG="${{ env.REL_VERSION }}" \
-  #         MANIFEST_LATEST_TAG="${{ env.LATEST_TAG }}" \
-  #           make docker-publish
-  #       shell: bash
-  #     - name: Build and push Docker multiarch manifest to GHCR
-  #       if: matrix.target_os != 'darwin'
-  #       env:
-  #         DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
-  #       run: |
-  #         echo "Build Docker multiarch manifest and push to GHCR"
-  #         DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
+          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
+          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
+          LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
+            make docker-publish
+        shell: bash
+      - name: Build and push Docker multiarch manifest to GHCR
+        env:
+          DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
+        run: |
+          echo "Build Docker multiarch manifest and push to GHCR"
+          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
 
-  #         # Publish the `-mariner` tag
-  #         # Mariner images are built only on linux/amd64 and linux/arm64
-  #         # Also, these use the "latest-mariner" tag if it's the latest
-  #         DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-  #         DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-  #         LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
-  #           make docker-publish
-  #     - name: Build and push Docker multiarch Windows manifest to GHCR
-  #       if: matrix.sidecar_flavor == 'allcomponents'
-  #       env:
-  #         DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
-  #       run: |
-  #         # Publish the `-windows-amd64` manifest.
-  #         DOCKER_MULTI_ARCH="windows-1809-amd64 windows-ltsc2022-amd64" \
-  #         DAPR_TAG="${{ env.REL_VERSION }}-windows-amd64" \
-  #         LATEST_TAG=latest-windows-amd64 \
-  #         MANIFEST_TAG="${{ env.REL_VERSION }}" \
-  #         MANIFEST_LATEST_TAG="${{ env.LATEST_TAG }}" \
-  #           make docker-publish
-  #       shell: bash
+          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
+          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
+          LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
+            make docker-publish
