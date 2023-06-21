@@ -22,6 +22,8 @@ import datetime
 gitRef = os.getenv("GITHUB_REF")
 tagRefPrefix = "refs/tags/v"
 
+print(gitRef)
+
 with open(os.getenv("GITHUB_ENV"), "a") as githubEnv:
 
     if "schedule" in sys.argv:
