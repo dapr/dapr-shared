@@ -79,7 +79,7 @@ jobs:
             ~/go/pkg/mod
           key: ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build
+            ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
