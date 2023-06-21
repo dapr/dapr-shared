@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   build:
-    name: "Build artifacts on ${{ matrix.job_name }} - ${{ matrix.sidecar_flavor }}"
+    name: "Build artifacts on ${{ matrix.job_name }}"
     runs-on: "${{ matrix.os }}"
     env:
       GOOS: "${{ matrix.target_os }}"
@@ -64,6 +64,13 @@ jobs:
           go-version-file: "go.mod"
       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+      - name: Updates version
+        # if: matrix.sidecar_flavor != 'allcomponents'
+        run: |
+          echo "REL_VERSION=${REL_VERSION}" >>${GITHUB_ENV}
+          # Only sidecar is built
+          echo "BINARIES=daprd" >>${GITHUB_ENV}
+        shell: bash
       - name: Set REPO_OWNER
         run: |
           REPO_OWNER=${{ github.repository_owner }}
@@ -80,6 +87,17 @@ jobs:
           key: ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-
+      - name: Run make release to build and archive binaries for flavor
+        env:
+          GOOS: ${{ matrix.target_os }}
+          GOARCH: ${{ matrix.target_arch }}
+          ARCHIVE_OUT_DIR: ${{ env.ARCHIVE_OUTDIR }}
+          DAPR_SIDECAR_FLAVOR: "${{ matrix.sidecar_flavor }}"
+        if: matrix.sidecar_flavor != 'allcomponents'
+        run: |
+          mkdir -p "${ARCHIVE_OUT_DIR}"
+          make release-flavor
+        shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
