@@ -46,4 +46,3 @@ jobs:
           git add README.md
           git commit -m "${{ env.COMMIT_MESSAGE }}"
           git push origin ${{ github.head_ref || github.ref_name }}
-
