@@ -159,7 +159,8 @@ jobs:
             --prerelease true \
             ${RELEASE_ARTIFACT[*]}
         shell: bash
-        
+
+# NEEDS MODIFICATION: PUSH TO ALL NECESSARY DOCKER REPOSITORIES
   docker-publish:
     name: Publish docker images
     needs: build
@@ -174,28 +175,17 @@ jobs:
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
+
       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-      - name: Updates version for sidecar flavor
-        run: |
-          echo "REL_VERSION=${REL_VERSION}" >>${GITHUB_ENV}
-          echo "LATEST_TAG=latest" >>${GITHUB_ENV}
-          # We are doing image flavors only for Linux.
-          echo "DOCKER_MULTI_ARCH=linux-amd64 linux-arm64" >>${GITHUB_ENV}
-          echo "BINARIES=daprd" >>${GITHUB_ENV}
-        shell: bash
+
       - name: Set REPO_OWNER
         shell: bash
         run: |
           REPO_OWNER=${{ github.repository_owner }}
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-      - name: Docker Hub Login
-        uses: docker/login-action@v2
-        if: env.DOCKER_REGISTRY != ''
-        with:
-          username: ${{ secrets.DOCKER_REGISTRY_ID }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+
       - name: GitHub Container Registry login
         uses: docker/login-action@v2
         if: matrix.target_os != 'darwin'
@@ -203,28 +193,57 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker multiarch manifest to Docker Hub
-        if: env.DOCKER_REGISTRY_ID != ''
-        env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-          DAPR_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-        run: |
-          echo "Build Docker multiarch manifest and push to Docker"
-          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
 
-          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-          LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
-            make docker-publish
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      
+      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+      
+      - name: setup helm
+        run: |
+          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+          sudo apt-get install apt-transport-https --yes
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+          sudo apt-get update
+          sudo apt-get install helm
+
+      - name: install helm
+        run: helm plugin install https://github.com/quintush/helm-unittest
+      
+      - name: execute unit tests
+        run: helm unittest chart/dapr-ambient
+
+      - name: update docs
+        if: github.ref == 'refs/heads/main'
+        run: |
+          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+          tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
+          ./helm-docs
+
+      - name: commit and push changes
+        if: github.ref == 'refs/heads/main'
+        env:
+          COMMIT_MESSAGE: "docs: update README.md"
+          COMMIT_AUTHOR: dapr-ambient-bot
+        run: |
+          mv chart/dapr-ambient/README.md README.md
+          git config --global user.name "${{ env.COMMIT_AUTHOR }}"
+          git config --global user.email "dapr-ambient-bot@diagrid.com"
+          git add README.md
+          git commit -m "${{ env.COMMIT_MESSAGE }}"
+          git push origin ${{ github.head_ref || github.ref_name }}
+      
+      # NEEDS MODIFICATION: PUSH TO AZURE ECR
+      - name: Package & Push Helm Chart
+        env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run : |
+          helm package \
+          ./chart/dapr-ambient \
+          --version ${RELEASE_VERSION}
+          helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${ECR_REGISTRY}
         shell: bash
-      - name: Build and push Docker multiarch manifest to GHCR
-        env:
-          DAPR_REGISTRY: ghcr.io/${{ env.REPO_OWNER }}
-        run: |
-          echo "Build Docker multiarch manifest and push to GHCR"
-          DAPR_TAG="${{ env.REL_VERSION }}" make docker-publish
-
-          DOCKER_MULTI_ARCH="linux-amd64 linux-arm64" \
-          DAPR_TAG="${{ env.REL_VERSION }}-mariner" \
-          LATEST_TAG=${{ env.LATEST_TAG }}-mariner \
-            make docker-publish
