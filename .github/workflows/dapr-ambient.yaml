@@ -39,21 +39,19 @@ jobs:
           - os: ubuntu-latest
             target_os: linux
             target_arch: amd64
-            job_name: "Linux/amd64"
+            job_name: "linux/amd64"
           - os: ubuntu-latest
             target_os: linux
             target_arch: arm64
-            job_name: "Linux/arm64"
+            job_name: "linux/arm64"
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-        # if: matrix.target_os == 'linux' && github.event_name != 'pull_request'
         with:
           image: tonistiigi/binfmt:latest
           platforms: arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        # if: matrix.target_os == 'linux' && github.event_name != 'pull_request'
         with:
           version: v0.10.1 # Don't use latest since it broke our workflow once
       - name: Check out code into the Go module directory
@@ -94,156 +92,160 @@ jobs:
           mkdir -p "${ARCHIVE_OUT_DIR}"
           make release
         shell: bash
+      # - uses: ko-build/setup-ko@v0.6
+      # - run: ko build --platform=${{ matrix.job_name }}
+      - run: ls
+        shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
           name: dapr-ambient_${{ matrix.target_os }}_${{ matrix.target_arch }}
           path: ${{ env.ARCHIVE_OUTDIR }}
 
-  publish:
-    name: Publish binaries
-    needs: build
-    if: github.event_name != 'pull_request'
-    env:
-      ARTIFACT_DIR: ./release
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
-      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-      - name: Set REPO_OWNER
-        shell: bash
-        run: |
-          REPO_OWNER=${{ github.repository_owner }}
-          # Lowercase the value
-          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-      - name: "download artifact: dapr-ambient_linux_amd64"
-        uses: actions/download-artifact@master
-        with:
-          name: dapr-ambient_linux_amd64
-          path: ${{ env.ARTIFACT_DIR }}
-      - name: "download artifact: dapr-ambient_linux_arm64"
-        uses: actions/download-artifact@master
-        with:
-          name: dapr-ambient_linux_amd64
-          path: ${{ env.ARTIFACT_DIR }}
-      - name: generate checksum files
-        run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
-      - name: lists artifacts
-        run: ls -l ${{ env.ARTIFACT_DIR }}
-      - name: publish binaries to github
-        if: startswith(github.ref, 'refs/tags/v')
-        run: |
-          echo "installing github-release-cli..."
-          sudo npm install --silent --no-progress -g github-release-cli@2.1.0
-          if [ "$LATEST_RELEASE" = "true" ]; then
-            export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
-          else
-            export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
-          fi
-          # Get the list of files
-          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
-          # Parse repository to get owner and repo names
-          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
-          echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
-          github-release upload \
-            --owner $OWNER_NAME \
-            --repo $REPO_NAME \
-            --tag "v${REL_VERSION}" \
-            --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
-            --body "${RELEASE_BODY}" \
-            --prerelease true \
-            ${RELEASE_ARTIFACT[*]}
-        shell: bash
+#   publish:
+#     name: Publish binaries
+#     needs: build
+#     if: github.event_name != 'pull_request'
+#     env:
+#       ARTIFACT_DIR: ./release
+#       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out code into the Go module directory
+#         uses: actions/checkout@v3
+#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+#       - name: Set REPO_OWNER
+#         shell: bash
+#         run: |
+#           REPO_OWNER=${{ github.repository_owner }}
+#           # Lowercase the value
+#           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+#       - name: "download artifact: dapr-ambient_linux_amd64"
+#         uses: actions/download-artifact@master
+#         with:
+#           name: dapr-ambient_linux_amd64
+#           path: ${{ env.ARTIFACT_DIR }}
+#       - name: "download artifact: dapr-ambient_linux_arm64"
+#         uses: actions/download-artifact@master
+#         with:
+#           name: dapr-ambient_linux_amd64
+#           path: ${{ env.ARTIFACT_DIR }}
+#       - name: generate checksum files
+#         run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
+#       - name: lists artifacts
+#         run: ls -l ${{ env.ARTIFACT_DIR }}
+#       - name: publish binaries to github
+#         if: startswith(github.ref, 'refs/tags/v')
+#         run: |
+#           echo "installing github-release-cli..."
+#           sudo npm install --silent --no-progress -g github-release-cli@2.1.0
+#           if [ "$LATEST_RELEASE" = "true" ]; then
+#             export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
+#           else
+#             export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
+#           fi
+#           # Get the list of files
+#           RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+#           # Parse repository to get owner and repo names
+#           OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+#           REPO_NAME="${GITHUB_REPOSITORY#*/}"
+#           export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
+#           echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
+#           github-release upload \
+#             --owner $OWNER_NAME \
+#             --repo $REPO_NAME \
+#             --tag "v${REL_VERSION}" \
+#             --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
+#             --body "${RELEASE_BODY}" \
+#             --prerelease true \
+#             ${RELEASE_ARTIFACT[*]}
+#         shell: bash
 
-# NEEDS MODIFICATION: PUSH TO ALL NECESSARY DOCKER REPOSITORIES
-  docker-publish:
-    name: Publish docker images
-    needs: build
-    # if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target_os: ["linux"]
-    steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
+# # NEEDS MODIFICATION: PUSH TO ALL NECESSARY DOCKER REPOSITORIES
+#   docker-publish:
+#     name: Publish docker images
+#     needs: build
+#     # if: github.event_name != 'pull_request'
+#     runs-on: ubuntu-latest
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         target_os: ["linux"]
+#     steps:
+#       - name: Check out code into the Go module directory
+#         uses: actions/checkout@v3
 
-      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
 
-      - name: Set REPO_OWNER
-        shell: bash
-        run: |
-          REPO_OWNER=${{ github.repository_owner }}
-          # Lowercase the value
-          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+#       - name: Set REPO_OWNER
+#         shell: bash
+#         run: |
+#           REPO_OWNER=${{ github.repository_owner }}
+#           # Lowercase the value
+#           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
 
-      - name: Container Registry login
-        uses: docker/login-action@v2
-        env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-        with:
-          # registry: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
-          username: ${{ secrets.DOCKER_REGISTRY_ID }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+#       - name: Container Registry login
+#         uses: docker/login-action@v2
+#         env:
+#           DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+#         with:
+#           # registry: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
+#           username: ${{ secrets.DOCKER_REGISTRY_ID }}
+#           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
 
-  helm:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
+#   helm:
+#     runs-on: ubuntu-latest
+#     if: github.event_name != 'pull_request'
+#     steps:
+#       - name: checkout
+#         uses: actions/checkout@v3
       
-      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
       
-      - name: setup helm
-        run: |
-          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-          sudo apt-get install apt-transport-https --yes
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-          sudo apt-get update
-          sudo apt-get install helm
+#       - name: setup helm
+#         run: |
+#           curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+#           sudo apt-get install apt-transport-https --yes
+#           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+#           sudo apt-get update
+#           sudo apt-get install helm
 
-      - name: install helm
-        run: helm plugin install https://github.com/quintush/helm-unittest
+#       - name: install helm
+#         run: helm plugin install https://github.com/quintush/helm-unittest
       
-      - name: execute unit tests
-        run: helm unittest chart/dapr-ambient
+#       - name: execute unit tests
+#         run: helm unittest chart/dapr-ambient
 
-      - name: update docs
-        if: github.ref == 'refs/heads/main'
-        run: |
-          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
-          tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
-          ./helm-docs
+#       - name: update docs
+#         if: github.ref == 'refs/heads/main'
+#         run: |
+#           wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+#           tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
+#           ./helm-docs
 
-      - name: commit and push changes
-        if: github.ref == 'refs/heads/main'
-        env:
-          COMMIT_MESSAGE: "docs: update README.md"
-          COMMIT_AUTHOR: dapr-ambient-bot
-        run: |
-          mv chart/dapr-ambient/README.md README.md
-          git config --global user.name "${{ env.COMMIT_AUTHOR }}"
-          git config --global user.email "dapr-ambient-bot@diagrid.com"
-          git add README.md
-          git commit -m "${{ env.COMMIT_MESSAGE }}"
-          git push origin ${{ github.head_ref || github.ref_name }}
+#       - name: commit and push changes
+#         if: github.ref == 'refs/heads/main'
+#         env:
+#           COMMIT_MESSAGE: "docs: update README.md"
+#           COMMIT_AUTHOR: dapr-ambient-bot
+#         run: |
+#           mv chart/dapr-ambient/README.md README.md
+#           git config --global user.name "${{ env.COMMIT_AUTHOR }}"
+#           git config --global user.email "dapr-ambient-bot@diagrid.com"
+#           git add README.md
+#           git commit -m "${{ env.COMMIT_MESSAGE }}"
+#           git push origin ${{ github.head_ref || github.ref_name }}
       
-      # NEEDS MODIFICATION: PUSH TO AZURE ECR
-      - name: Package & Push Helm Chart
-        env:
-            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run : |
-          helm package \
-          ./chart/dapr-ambient \
-          --version ${RELEASE_VERSION}
-          helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
-        shell: bash
+#       # NEEDS MODIFICATION: PUSH TO AZURE ECR
+#       - name: Package & Push Helm Chart
+#         env:
+#             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#         run : |
+#           helm package \
+#           ./chart/dapr-ambient \
+#           --version ${RELEASE_VERSION}
+#           helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
+#         shell: bash
