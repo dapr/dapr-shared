@@ -66,19 +66,23 @@ jobs:
         run: |
           make release
         shell: bash
+      
+      - name: Copy out file from volume
+        run: |
+          sudo cp ./ambient-init ${{ env.ARCHIVE_OUTDIR }}/ambient-init
 
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
           name: ambient-init
-          path: ./
+          path: ${{ env.ARCHIVE_OUTDIR }}
 
   publish:
     name: Publish binaries
     needs: build
     if: github.event_name != 'pull_request'
     env:
-      ARTIFACT_DIR: ./release
+      ARCHIVE_OUTDIR: "dist/archives"
       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
     runs-on: ubuntu-latest
     steps:
@@ -96,7 +100,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: ambient-init
-          path: ./
+          path: ${{ env.ARCHIVE_OUTDIR }}
       - name: generate checksum files
         run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
       - name: publish binaries to github
