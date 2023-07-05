@@ -84,26 +84,15 @@ jobs:
           restore-keys: |
             ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-
       - name: Run make release to build and archive binaries
-        env:
-          GOOS: ${{ matrix.target_os }}
-          GOARCH: ${{ matrix.target_arch }}
-          ARCHIVE_OUT_DIR: ${{ env.ARCHIVE_OUTDIR }}
         run: |
-          mkdir -p "${ARCHIVE_OUT_DIR}"
-          cd ${ARCHIVE_OUT_DIR}
           make release
         shell: bash
       # - uses: ko-build/setup-ko@v0.6
       # - run: ko build --platform=${{ matrix.job_name }}
-      - run: ls dist
-        shell: bash
-      - run: ls dist/archives/
-        shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
-          name: dapr-ambient_${{ matrix.target_os }}_${{ matrix.target_arch }}
-          path: ${{ env.ARCHIVE_OUTDIR }}
+          name: ./ambient-init
 
 #   publish:
 #     name: Publish binaries
