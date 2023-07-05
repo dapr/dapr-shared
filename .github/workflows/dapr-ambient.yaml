@@ -189,8 +189,8 @@ jobs:
         if: matrix.target_os != 'darwin'
         with:
           registry: ${{ secrets.DOCKER_REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_REGISTRY_ID }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
 
   helm:
     runs-on: ubuntu-latest
