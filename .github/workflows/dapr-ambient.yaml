@@ -94,7 +94,7 @@ jobs:
         shell: bash
       # - uses: ko-build/setup-ko@v0.6
       # - run: ko build --platform=${{ matrix.job_name }}
-      - run: ls
+      - run: ls /dist/archives/
         shell: bash
       - name: upload artifacts
         uses: actions/upload-artifact@master
