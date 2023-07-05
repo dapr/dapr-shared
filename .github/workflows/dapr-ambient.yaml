@@ -196,6 +196,7 @@ jobs:
 
   helm:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - name: checkout
         uses: actions/checkout@v3
