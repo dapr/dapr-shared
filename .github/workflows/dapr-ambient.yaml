@@ -184,7 +184,7 @@ jobs:
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
 
-      - name: GitHub Container Registry login
+      - name: Container Registry login
         uses: docker/login-action@v2
         if: matrix.target_os != 'darwin'
         with:
