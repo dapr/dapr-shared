@@ -85,6 +85,7 @@ jobs:
     env:
       ARCHIVE_OUTDIR: "dist/archives"
       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      ARTIFACT_DIR: ./release
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
@@ -103,7 +104,7 @@ jobs:
           name: ambient-init
           path: ${{ env.ARCHIVE_OUTDIR }}
       - name: generate checksum files
-        run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
+        run: cd ${{ env.ARCHIVE_OUTDIR }} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
       - name: publish binaries to github
         if: startswith(github.ref, 'refs/tags/v')
         run: |
@@ -115,7 +116,7 @@ jobs:
             export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
           fi
           # Get the list of files
-          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+          RELEASE_ARTIFACT=(${{ env.ARCHIVE_OUTDIR }}/*)
           # Parse repository to get owner and repo names
           OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
@@ -160,7 +161,7 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
       
       - uses: ko-build/setup-ko@v0.6
-      - run: ko build
+      - run: ko build cmd/ambient-init/main.go
 
 # #   helm:
 # #     runs-on: ubuntu-latest
@@ -185,26 +186,6 @@ jobs:
       
 # #       - name: execute unit tests
 # #         run: helm unittest chart/dapr-ambient
-
-# #       - name: update docs
-# #         if: github.ref == 'refs/heads/main'
-# #         run: |
-# #           wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
-# #           tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
-# #           ./helm-docs
-
-# #       - name: commit and push changes
-# #         if: github.ref == 'refs/heads/main'
-# #         env:
-# #           COMMIT_MESSAGE: "docs: update README.md"
-# #           COMMIT_AUTHOR: dapr-ambient-bot
-# #         run: |
-# #           mv chart/dapr-ambient/README.md README.md
-# #           git config --global user.name "${{ env.COMMIT_AUTHOR }}"
-# #           git config --global user.email "dapr-ambient-bot@diagrid.com"
-# #           git add README.md
-# #           git commit -m "${{ env.COMMIT_MESSAGE }}"
-# #           git push origin ${{ github.head_ref || github.ref_name }}
       
 # #       # NEEDS MODIFICATION: PUSH TO AZURE ECR
 # #       - name: Package & Push Helm Chart
