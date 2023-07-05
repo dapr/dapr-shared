@@ -73,99 +73,89 @@ jobs:
           name: ambient-init
           path: ./
 
-#   publish:
-#     name: Publish binaries
-#     needs: build
-#     if: github.event_name != 'pull_request'
-#     env:
-#       ARTIFACT_DIR: ./release
-#       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check out code into the Go module directory
-#         uses: actions/checkout@v3
-#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-#       - name: Set REPO_OWNER
-#         shell: bash
-#         run: |
-#           REPO_OWNER=${{ github.repository_owner }}
-#           # Lowercase the value
-#           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-#       - name: "download artifact: dapr-ambient_linux_amd64"
-#         uses: actions/download-artifact@master
-#         with:
-#           name: dapr-ambient_linux_amd64
-#           path: ./
-#       - name: "download artifact: dapr-ambient_linux_arm64"
-#         uses: actions/download-artifact@master
-#         with:
-#           name: dapr-ambient_linux_amd64
-#           path: ./
-#       - name: generate checksum files
-#         run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
-#       - name: publish binaries to github
-#         if: startswith(github.ref, 'refs/tags/v')
-#         run: |
-#           echo "installing github-release-cli..."
-#           sudo npm install --silent --no-progress -g github-release-cli@2.1.0
-#           if [ "$LATEST_RELEASE" = "true" ]; then
-#             export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
-#           else
-#             export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
-#           fi
-#           # Get the list of files
-#           RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
-#           # Parse repository to get owner and repo names
-#           OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
-#           REPO_NAME="${GITHUB_REPOSITORY#*/}"
-#           export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
-#           echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
-#           github-release upload \
-#             --owner $OWNER_NAME \
-#             --repo $REPO_NAME \
-#             --tag "v${REL_VERSION}" \
-#             --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
-#             --body "${RELEASE_BODY}" \
-#             --prerelease true \
-#             ${RELEASE_ARTIFACT[*]}
-#         shell: bash
+  publish:
+    name: Publish binaries
+    needs: build
+    if: github.event_name != 'pull_request'
+    env:
+      ARTIFACT_DIR: ./release
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+      - name: Set REPO_OWNER
+        shell: bash
+        run: |
+          REPO_OWNER=${{ github.repository_owner }}
+          # Lowercase the value
+          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+      - name: "download artifact: dapr-ambient-init"
+        uses: actions/download-artifact@master
+        with:
+          name: ambient-init
+          path: ./
+      - name: generate checksum files
+        run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
+      - name: publish binaries to github
+        if: startswith(github.ref, 'refs/tags/v')
+        run: |
+          echo "installing github-release-cli..."
+          sudo npm install --silent --no-progress -g github-release-cli@2.1.0
+          if [ "$LATEST_RELEASE" = "true" ]; then
+            export RELEASE_BODY=`cat ./docs/release_notes/v${REL_VERSION}.md`
+          else
+            export RELEASE_BODY="This is the release candidate ${REL_VERSION}"
+          fi
+          # Get the list of files
+          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+          # Parse repository to get owner and repo names
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
+          echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
+          github-release upload \
+            --owner $OWNER_NAME \
+            --repo $REPO_NAME \
+            --tag "v${REL_VERSION}" \
+            --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
+            --body "${RELEASE_BODY}" \
+            --prerelease true \
+            ${RELEASE_ARTIFACT[*]}
+        shell: bash
 
-# # NEEDS MODIFICATION: PUSH TO ALL NECESSARY DOCKER REPOSITORIES
-#   docker-publish:
-#     name: Publish docker images
-#     needs: build
-#     # if: github.event_name != 'pull_request'
-#     runs-on: ubuntu-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         target_os: ["linux"]
-#     steps:
-#       - name: Check out code into the Go module directory
-#         uses: actions/checkout@v3
+  docker-publish:
+    name: Publish docker images
+    needs: build
+    # if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
 
-#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-#       - name: Set REPO_OWNER
-#         shell: bash
-#         run: |
-#           REPO_OWNER=${{ github.repository_owner }}
-#           # Lowercase the value
-#           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+      - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+        run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
 
-#       - name: Container Registry login
-#         uses: docker/login-action@v2
-#         env:
-#           DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
-#         with:
-#           # registry: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
-#           username: ${{ secrets.DOCKER_REGISTRY_ID }}
-#           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+      - name: Set REPO_OWNER
+        shell: bash
+        run: |
+          REPO_OWNER=${{ github.repository_owner }}
+          # Lowercase the value
+          echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+
+      - name: Container Registry login
+        uses: docker/login-action@v2
+        env:
+          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_ID }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
       
-#       - uses: ko-build/setup-ko@v0.6
-#       - run: ko build --platform=${{ matrix.job_name }}
+      - uses: ko-build/setup-ko@v0.6
+      - run: ko build
 
 # #   helm:
 # #     runs-on: ubuntu-latest
