@@ -90,6 +90,7 @@ jobs:
           ARCHIVE_OUT_DIR: ${{ env.ARCHIVE_OUTDIR }}
         run: |
           mkdir -p "${ARCHIVE_OUT_DIR}"
+          cd ${ARCHIVE_OUT_DIR}
           make release
         shell: bash
       # - uses: ko-build/setup-ko@v0.6
