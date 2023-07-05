@@ -97,7 +97,7 @@ jobs:
           REPO_OWNER=${{ github.repository_owner }}
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-      - name: "download artifact: dapr-ambient-init"
+      - name: "download artifact: ambient-init"
         uses: actions/download-artifact@master
         with:
           name: ambient-init
