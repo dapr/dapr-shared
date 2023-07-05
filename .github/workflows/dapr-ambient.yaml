@@ -164,9 +164,7 @@ jobs:
   docker-publish:
     name: Publish docker images
     needs: build
-    if: github.event_name != 'pull_request'
-    env:
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -190,7 +188,7 @@ jobs:
         uses: docker/login-action@v2
         if: matrix.target_os != 'darwin'
         with:
-          registry: ghcr.io
+          registry: ${{ secrets.DOCKER_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
