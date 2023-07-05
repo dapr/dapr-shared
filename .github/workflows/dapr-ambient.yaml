@@ -61,6 +61,7 @@ jobs:
           REPO_OWNER=${{ github.repository_owner }}
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
+          mkdir -p ${{ env.ARCHIVE_OUTDIR }}
         shell: bash
       - name: Run make release to build and archive binaries
         run: |
@@ -96,7 +97,6 @@ jobs:
           REPO_OWNER=${{ github.repository_owner }}
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-          mkdir -p ${{ env.ARCHIVE_OUTDIR }}
       - name: "download artifact: dapr-ambient-init"
         uses: actions/download-artifact@master
         with:
