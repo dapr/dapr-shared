@@ -25,8 +25,8 @@ permissions:
 
 jobs:
   build:
-    name: "Build artifacts on ${{ matrix.job_name }}"
-    runs-on: "${{ matrix.os }}"
+    name: "Build artifacts on ubuntu"
+    runs-on: ubuntu-latest
     env:
       GOOS: "${{ matrix.target_os }}"
       GOARCH: "${{ matrix.target_arch }}"
