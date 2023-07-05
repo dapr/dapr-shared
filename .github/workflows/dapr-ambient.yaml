@@ -32,18 +32,6 @@ jobs:
       GOARCH: "${{ matrix.target_arch }}"
       GOPROXY: "https://proxy.golang.org"
       ARCHIVE_OUTDIR: "dist/archives"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target_os: linux
-            target_arch: amd64
-            job_name: "linux/amd64"
-          - os: ubuntu-latest
-            target_os: linux
-            target_arch: arm64
-            job_name: "linux/arm64"
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -74,21 +62,11 @@ jobs:
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
         shell: bash
-      - name: Cache Go modules (Linux)
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ matrix.target_os }}-${{ matrix.target_arch }}-go-${{ steps.setup-go.outputs.go-version }}-build-
       - name: Run make release to build and archive binaries
         run: |
           make release
         shell: bash
-      # - uses: ko-build/setup-ko@v0.6
-      # - run: ko build --platform=${{ matrix.job_name }}
+
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
@@ -118,16 +96,14 @@ jobs:
 #         uses: actions/download-artifact@master
 #         with:
 #           name: dapr-ambient_linux_amd64
-#           path: ${{ env.ARTIFACT_DIR }}
+#           path: ./
 #       - name: "download artifact: dapr-ambient_linux_arm64"
 #         uses: actions/download-artifact@master
 #         with:
 #           name: dapr-ambient_linux_amd64
-#           path: ${{ env.ARTIFACT_DIR }}
+#           path: ./
 #       - name: generate checksum files
 #         run: cd ${ARTIFACT_DIR} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
-#       - name: lists artifacts
-#         run: ls -l ${{ env.ARTIFACT_DIR }}
 #       - name: publish binaries to github
 #         if: startswith(github.ref, 'refs/tags/v')
 #         run: |
@@ -187,58 +163,61 @@ jobs:
 #           # registry: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
 #           username: ${{ secrets.DOCKER_REGISTRY_ID }}
 #           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
-
-#   helm:
-#     runs-on: ubuntu-latest
-#     if: github.event_name != 'pull_request'
-#     steps:
-#       - name: checkout
-#         uses: actions/checkout@v3
       
-#       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-#         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
-      
-#       - name: setup helm
-#         run: |
-#           curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-#           sudo apt-get install apt-transport-https --yes
-#           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-#           sudo apt-get update
-#           sudo apt-get install helm
+#       - uses: ko-build/setup-ko@v0.6
+#       - run: ko build --platform=${{ matrix.job_name }}
 
-#       - name: install helm
-#         run: helm plugin install https://github.com/quintush/helm-unittest
+# #   helm:
+# #     runs-on: ubuntu-latest
+# #     if: github.event_name != 'pull_request'
+# #     steps:
+# #       - name: checkout
+# #         uses: actions/checkout@v3
       
-#       - name: execute unit tests
-#         run: helm unittest chart/dapr-ambient
-
-#       - name: update docs
-#         if: github.ref == 'refs/heads/main'
-#         run: |
-#           wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
-#           tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
-#           ./helm-docs
-
-#       - name: commit and push changes
-#         if: github.ref == 'refs/heads/main'
-#         env:
-#           COMMIT_MESSAGE: "docs: update README.md"
-#           COMMIT_AUTHOR: dapr-ambient-bot
-#         run: |
-#           mv chart/dapr-ambient/README.md README.md
-#           git config --global user.name "${{ env.COMMIT_AUTHOR }}"
-#           git config --global user.email "dapr-ambient-bot@diagrid.com"
-#           git add README.md
-#           git commit -m "${{ env.COMMIT_MESSAGE }}"
-#           git push origin ${{ github.head_ref || github.ref_name }}
+# #       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+# #         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
       
-#       # NEEDS MODIFICATION: PUSH TO AZURE ECR
-#       - name: Package & Push Helm Chart
-#         env:
-#             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#         run : |
-#           helm package \
-#           ./chart/dapr-ambient \
-#           --version ${RELEASE_VERSION}
-#           helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
-#         shell: bash
+# #       - name: setup helm
+# #         run: |
+# #           curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+# #           sudo apt-get install apt-transport-https --yes
+# #           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+# #           sudo apt-get update
+# #           sudo apt-get install helm
+
+# #       - name: install helm
+# #         run: helm plugin install https://github.com/quintush/helm-unittest
+      
+# #       - name: execute unit tests
+# #         run: helm unittest chart/dapr-ambient
+
+# #       - name: update docs
+# #         if: github.ref == 'refs/heads/main'
+# #         run: |
+# #           wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz
+# #           tar -zxf helm-docs_1.11.0_Linux_x86_64.tar.gz
+# #           ./helm-docs
+
+# #       - name: commit and push changes
+# #         if: github.ref == 'refs/heads/main'
+# #         env:
+# #           COMMIT_MESSAGE: "docs: update README.md"
+# #           COMMIT_AUTHOR: dapr-ambient-bot
+# #         run: |
+# #           mv chart/dapr-ambient/README.md README.md
+# #           git config --global user.name "${{ env.COMMIT_AUTHOR }}"
+# #           git config --global user.email "dapr-ambient-bot@diagrid.com"
+# #           git add README.md
+# #           git commit -m "${{ env.COMMIT_MESSAGE }}"
+# #           git push origin ${{ github.head_ref || github.ref_name }}
+      
+# #       # NEEDS MODIFICATION: PUSH TO AZURE ECR
+# #       - name: Package & Push Helm Chart
+# #         env:
+# #             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+# #         run : |
+# #           helm package \
+# #           ./chart/dapr-ambient \
+# #           --version ${RELEASE_VERSION}
+# #           helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
+# #         shell: bash
