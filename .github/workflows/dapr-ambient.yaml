@@ -162,38 +162,47 @@ jobs:
       
       - uses: ko-build/setup-ko@v0.6
       - run: ko build cmd/ambient-init/main.go
+        env:
+          KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
 
-# #   helm:
-# #     runs-on: ubuntu-latest
-# #     if: github.event_name != 'pull_request'
-# #     steps:
-# #       - name: checkout
-# #         uses: actions/checkout@v3
+  # helm:
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name != 'pull_request'
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v3
       
-# #       - name: Parse release version and set REL_VERSION and LATEST_RELEASE
-# #         run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
+  #     - name: Parse release version and set REL_VERSION and LATEST_RELEASE
+  #       run: python ./.github/scripts/get_release_version.py ${{ github.event_name }}
       
-# #       - name: setup helm
-# #         run: |
-# #           curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-# #           sudo apt-get install apt-transport-https --yes
-# #           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-# #           sudo apt-get update
-# #           sudo apt-get install helm
+  #     - name: setup helm
+  #       run: |
+  #         curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+  #         sudo apt-get install apt-transport-https --yes
+  #         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+  #         sudo apt-get update
+  #         sudo apt-get install helm
 
-# #       - name: install helm
-# #         run: helm plugin install https://github.com/quintush/helm-unittest
+  #     - name: install helm
+  #       run: helm plugin install https://github.com/quintush/helm-unittest
       
-# #       - name: execute unit tests
-# #         run: helm unittest chart/dapr-ambient
+  #     - name: execute unit tests
+  #       run: helm unittest chart/dapr-ambient
       
-# #       # NEEDS MODIFICATION: PUSH TO AZURE ECR
-# #       - name: Package & Push Helm Chart
-# #         env:
-# #             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-# #         run : |
-# #           helm package \
-# #           ./chart/dapr-ambient \
-# #           --version ${RELEASE_VERSION}
-# #           helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
-# #         shell: bash
+  #     - name: Container Registry login
+  #       uses: docker/login-action@v2
+  #       env:
+  #         DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+  #       with:
+  #         username: ${{ secrets.DOCKER_REGISTRY_ID }}
+  #         password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+      
+  #     - name: Package & Push Helm Chart
+  #       env:
+  #           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #       run : |
+  #         helm package \
+  #         ./chart/dapr-ambient \
+  #         --version ${RELEASE_VERSION}
+  #         helm push "${RELEASE_NAME}-${RELEASE_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
+  #       shell: bash
