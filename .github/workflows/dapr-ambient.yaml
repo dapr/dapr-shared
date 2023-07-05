@@ -161,7 +161,8 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
       
       - uses: ko-build/setup-ko@v0.6
-      - run: ko build cmd/ambient-init/main.go
+      
+      - run: ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64
         env:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
 
