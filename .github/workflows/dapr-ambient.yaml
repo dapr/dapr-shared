@@ -166,8 +166,6 @@ jobs:
         env:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
         run: |
-          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
-          cp cmd/ambient-init/main.go cmd/ambient-init/ambient-dapr
           ko build cmd/ambient-init/ambient-dapr --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
 
   helm:
@@ -194,7 +192,7 @@ jobs:
       - name: execute unit tests
         run: helm unittest chart/dapr-ambient
       
-      - name: Update manifest
+      - name: Update init-container tag
         run: |
           sed -i -e "s|tag: latest|tag: ${REL_VERSION}|g" ./chart/dapr-ambient/values.yaml
           cat ./chart/dapr-ambient/values.yaml
