@@ -167,8 +167,12 @@ jobs:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
         run: |
           cp cmd/ambient-init/main.go ./dapr-ambient
+          cat ./dapr-ambient
           ls ./
           ko build ./dapr-ambient --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
+
+          cp cmd/ambient-init/main.go ./main.go
+          ko build main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
 
   helm:
     runs-on: ubuntu-latest
@@ -207,5 +211,5 @@ jobs:
           helm package \
           ./chart/dapr-ambient \
           --version ${REL_VERSION}
-          helm push dapr-ambient-v${REL_VERSION}.tgz oci://${{ secrets.DOCKER_REGISTRY }}
+          helm push dapr-ambient-${REL_VERSION}.tgz oci://${{ secrets.DOCKER_REGISTRY_ID }}
         shell: bash
