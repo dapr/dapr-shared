@@ -206,5 +206,6 @@ jobs:
           helm package \
           ./chart/dapr-ambient \
           --version ${REL_VERSION}
-          helm push "dapr-ambient-${REL_VERSION}.tgz" oci://${{ secrets.DOCKER_REGISTRY }}
+          ls
+          helm push dapr-ambient-${REL_VERSION}.tgz oci://${{ secrets.DOCKER_REGISTRY }}
         shell: bash
