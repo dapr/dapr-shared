@@ -167,7 +167,7 @@ jobs:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
         run: |
           cp cmd/ambient-init/main.go ./dapr-ambient
-          ko build dapr-ambient --platform=linux/amd64,linux/arm64 --tag ${REL_VERSION}
+          ko build dapr-ambient --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
 
   helm:
     runs-on: ubuntu-latest
