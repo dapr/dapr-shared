@@ -164,7 +164,7 @@ jobs:
       
       - name: Build & Push Images
         env:
-          KO_DOCKER_REPO: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
+          KO_DOCKER_REPO: ${{ vars.DOCKER_DAPRIO_REGISTRY }}/dapr-ambient
         run: |
           ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION} --bare
      
