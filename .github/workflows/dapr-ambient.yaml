@@ -164,7 +164,7 @@ jobs:
       
       - name: Build & Push Images
         env:
-          KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
+          KO_DOCKER_REPO: ${{ secrets.DOCKER_DAPRIO_REGISTRY }}
         run: |
           ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION} --bare
      
