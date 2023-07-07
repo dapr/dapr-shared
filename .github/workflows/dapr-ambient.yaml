@@ -209,6 +209,6 @@ jobs:
         run : |
           helm package \
           ./chart/dapr-ambient \
-          --version ${REL_VERSION}
-          helm push dapr-ambient-${REL_VERSION}.tgz oci://docker.io/${{ secrets.DOCKER_REGISTRY_ID }}/ambient
+          --version v${REL_VERSION}
+          helm push dapr-ambient-v${REL_VERSION}.tgz oci://docker.io/${{ secrets.DOCKER_REGISTRY_ID }}/ambient
         shell: bash
