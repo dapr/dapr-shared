@@ -166,8 +166,8 @@ jobs:
         env:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
         run: |
-          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
-            
+          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION} --bare
+     
   helm:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
