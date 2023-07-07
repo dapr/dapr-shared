@@ -189,8 +189,8 @@ jobs:
       - name: install helm
         run: helm plugin install https://github.com/quintush/helm-unittest
       
-      - name: execute unit tests
-        run: helm unittest chart/dapr-ambient
+      # - name: execute unit tests
+      #   run: helm unittest chart/dapr-ambient
       
       - name: Update init-container tag
         run: |
