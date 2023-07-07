@@ -135,7 +135,7 @@ jobs:
   docker-publish:
     name: Publish docker images
     needs: build
-    # if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -155,7 +155,7 @@ jobs:
       - name: Container Registry login
         uses: docker/login-action@v2
         env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+          DOCKER_REGISTRY_ID: ${{ vars.DOCKER_DAPRIO_REGISTRY }}
         with:
           username: ${{ secrets.DOCKER_REGISTRY_ID }}
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
