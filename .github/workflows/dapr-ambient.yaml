@@ -166,7 +166,7 @@ jobs:
         env:
           KO_DOCKER_REPO: ${{ secrets.DOCKER_REGISTRY_ID }}
         run: |
-          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64
+          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION}
             
   helm:
     runs-on: ubuntu-latest
