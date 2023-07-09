@@ -149,7 +149,7 @@ If you want to see the implementation's detail, you [can access this repository]
 Let's submit a value to the `write-values` service, but first let's use `kubectl port-forward` to be able to reach the service which is running inside our cluster:
 
 ```sh
-  kubectl port-forward svc/write-values-svc 8080:8080
+  kubectl port-forward svc/write-values-svc 8080:80
 ```
 
 Now you can send an HTTP request to the application:
@@ -202,7 +202,7 @@ Subscriber received on /notifications: 10
 The `read-values` applications gets all values from StateStore and calculates the average.
 
 ```sh
-  kubectl port-forward svc/read-values-svc 8888:8080
+  kubectl port-forward svc/read-values-svc 8888:80
 ```
 
 After, you can make a request to `read-values-svc`:
