@@ -127,13 +127,12 @@ Finally, let's install Dapr Ambient and three applications that uses the Dapr St
 
 First let's add the Dapr Ambient Helm Repository:
 ```
-helm add repo ambient https://salaboy.github.io/helm/
-helm repo update
+helm pull oci://registry-1.docker.io/daprio/dapr-ambient-chart --version 0.0.2
 ```
 Then install Dapr Ambient Helm Chart running this:
 
 ```sh
-  helm install my-ambient-dapr-ambient ambient/dapr-ambient --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc
+  helm install my-ambient-dapr-ambient oci://registry-1.docker.io/daprio/dapr-ambient-chart --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc
 ```
 
 Now that we have the Dapr control plane, Redis, the PubSub and StateStore component and our Dapr Ambient instance let's deploy the example apps:
