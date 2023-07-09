@@ -1,4 +1,3 @@
-fullnameOverride: dapr-ambient
 ambient:
   # -- The default strategy to run dapr in ambient mode. Possible values `daemonset`, `deployment`.
   strategy: daemonset
