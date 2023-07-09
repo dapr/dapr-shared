@@ -34,7 +34,7 @@ ambient:
       # -- The dapr-ambient image name.
       name: dapr-ambient
       # -- The dapr-ambient-init image tag.
-      tag: latest
+      tag: 0.0.2
       # -- The init container pull policy.
       pullPolicy: Always
   daprd:

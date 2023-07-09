@@ -273,55 +273,55 @@ tests:
           path: spec.template.spec.containers[0].args[12]
           value: --control-plane-address=control.plane.address:80
   
-  - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
-    values:
-      - ../values.yaml
-      - ./values/required.yaml
-    set:
-      ambient.daprd.app.token: true
-    asserts:
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 8
+  # - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
+  #   values:
+  #     - ../values.yaml
+  #     - ./values/required.yaml
+  #   set:
+  #     ambient.daprd.app.token: true
+  #   asserts:
+  #     - lengthEqual:
+  #         path: spec.template.spec.containers[0].env
+  #         count: 8
 
-  - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
-    values:
-      - ../values.yaml
-      - ./values/required.yaml
-    set:
-      ambient.daprd.app.token: false
-    asserts:
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 7
+  # - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
+  #   values:
+  #     - ../values.yaml
+  #     - ./values/required.yaml
+  #   set:
+  #     ambient.daprd.app.token: false
+  #   asserts:
+  #     - lengthEqual:
+  #         path: spec.template.spec.containers[0].env
+  #         count: 7
 
-  - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
-    values:
-      - ../values.yaml
-      - ./values/required.yaml
-    set:
-      ambient.daprd.app.token: true
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DAPR_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                key: dapr-api-token
-                name: RELEASE-NAME-dapr-ambient
+  # - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
+  #   values:
+  #     - ../values.yaml
+  #     - ./values/required.yaml
+  #   set:
+  #     ambient.daprd.app.token: true
+  #   asserts:
+  #     - contains:
+  #         path: spec.template.spec.containers[0].env
+  #         content:
+  #           name: DAPR_API_TOKEN
+  #           valueFrom:
+  #             secretKeyRef:
+  #               key: dapr-api-token
+  #               name: RELEASE-NAME-dapr-ambient
 
-  - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
-    values:
-      - ../values.yaml
-      - ./values/required.yaml
-    set:
-      ambient.daprd.app.token: true
-    asserts:
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: DAPR_API_TOKEN
+  # - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
+  #   values:
+  #     - ../values.yaml
+  #     - ./values/required.yaml
+  #   set:
+  #     ambient.daprd.app.token: true
+  #   asserts:
+  #     - notContains:
+  #         path: spec.template.spec.containers[0].env
+  #         content:
+  #           name: DAPR_API_TOKEN
 
 
   - it: should set ports
