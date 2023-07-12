@@ -104,7 +104,7 @@ auth:
 EOF
 ```
 
-Once we have the PubSub component configured, we can register Subscriptions to define who and where notifications will be sent when new messages arrive to the `notification` topic.
+Once configured the PubSub component, we can register Subscriptions to define who and where notifications will be sent when new messages arrive to the `notification` topic.
 
 Create the Subscription component applying this resource to Kubernetes by running:
 
@@ -128,10 +128,10 @@ Finally, let's install Dapr Ambient and three applications that uses the Dapr St
 Install Dapr Ambient Helm Chart running this:
 
 ```sh
-  helm install my-ambient oci://registry-1.docker.io/daprio/dapr-ambient-chart --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc
+  helm install my-ambient oci://docker.io/daprio/dapr-ambient-chart --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc --set ambient.remotePort=80
 ```
 
-Now that we have the Dapr control plane, Redis, the PubSub and StateStore component and our Dapr Ambient instance let's deploy the example apps:
+Now that we have the Dapr control plane, Redis, the PubSub and StateStore component, and our Dapr Ambient instance, let's deploy the example apps:
 
 These are standard Kubernetes applications, using `Deployments` and `Services`.
 ```sh
