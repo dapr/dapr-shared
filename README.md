@@ -13,10 +13,10 @@ Before installing Dapr Ambient, please ensure you have Dapr installed in your cl
 If you want to get started with Dapr Ambient, you can easily create a new Dapr Ambient instance by installing the official Helm Chart:
 
 ```
-helm install my-ambient-dapr-ambient oci://registry-1.docker.io/daprio/dapr-ambient-chart --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL>
+helm install my-ambient-dapr-ambient oci://registry-1.docker.io/daprio/dapr-ambient-chart --set ambient.appId=<DAPR_APP_ID> --set ambient.remoteURL=<REMOTE_URL> ambient.remotePort=<REMOTE_PORT>
 ```
 
-If you want to take a look at a step by step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
+If you want to look at a step-by-step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
 
 ## From Source
 
