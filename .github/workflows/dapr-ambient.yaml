@@ -84,7 +84,7 @@ jobs:
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
-        
+
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -102,13 +102,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install helm
 
-      - name: Install helm chart on Kind
+      - name: Install dapr chart
         run: |
           kubectl config use-context kind-chart-testing
-          kubectl get nodes
-          helm install dapr-ambient chart/dapr-ambient --dry-run
-          helm install dapr-ambient chart/dapr-ambient
-        shell: bash 
+          helm repo add dapr https://dapr.github.io/helm-charts/
+          helm repo update
+
+          helm upgrade --install dapr dapr/dapr \
+          --version=1.11 \
+          --namespace dapr-system \
+          --create-namespace \
+          --wait
+
+      - name: Install ambient chart
+        run: |
+          helm install dapr-ambient chart/dapr-ambient \
+          --set ambient.appId=my-dapr-app \
+          --set ambient.remoteURL=subscriber-svc \
+          --set ambient.remotePort=80 \
+          --dry-run
+
+          helm install dapr-ambient chart/dapr-ambient \
+          --set ambient.appId=my-dapr-app \
+          --set ambient.remoteURL=subscriber-svc \
+          --set ambient.remotePort=80
       
   publish:
     name: Publish binaries
