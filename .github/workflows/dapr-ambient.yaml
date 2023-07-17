@@ -93,8 +93,8 @@ jobs:
 
       - name: Interact with the cluster
         run: |
-          kubectl config get-contexts
-          kubectl config use-context chart-testing
+          kubectl config use-context kind-chart-testing
+          kubectl get nodes
         shell: bash 
 
   publish:
