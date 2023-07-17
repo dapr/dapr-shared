@@ -1,3 +1,4 @@
+fullnameOverride: dapr-ambient
 ambient:
   # -- The default strategy to run dapr in ambient mode. Possible values `daemonset`, `deployment`.
   strategy: daemonset
@@ -29,7 +30,7 @@ ambient:
     token: ""
     image:  
       # -- The dapr-ambient image registry.
-      registry: "docker.io/matheuscruzdev"
+      registry: "docker.io/daprio"
       # -- The dapr-ambient image name.
       name: dapr-ambient
       # -- The dapr-ambient-init image tag.

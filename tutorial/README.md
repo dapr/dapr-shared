@@ -3,7 +3,7 @@ This tutorial provides step-by-step instructions for installing Dapr Ambient and
 
 ## Prerequisites and Installation
 
-Before proceeding, ensure that you have the necessary tools installed on your system. We will be creating a local KinD cluster to install Dapr, some applications and an instance of Dapr Ambient.
+Before proceeding, please make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Ambient.
 
 To get started, make sure you have the following CLIs installed:
 
@@ -19,7 +19,7 @@ To get started, make sure you have the following CLIs installed:
 
 ## Creating a local Kubernetes cluster with KinD: 
 
-Here, you will create a simple kubernetes cluster with KinD defaults running the following command:
+Here, you will create a simple Kubernetes cluster with KinD defaults running the following command:
 
 ```bash
   kind create cluster --name dapr-ambient
@@ -41,7 +41,7 @@ Finally, let's install the Dapr Control Plane:
   helm repo add dapr https://dapr.github.io/helm-charts/
   helm repo update
   helm upgrade --install dapr dapr/dapr \
-  --version=1.10.4 \
+  --version=1.11.0 \
   --namespace dapr-system \
   --create-namespace \
   --wait
@@ -54,7 +54,7 @@ Note that you create a new namespace called `dapr-system`.
 In this section, we will be configure two Dapr Components: [PubSub](https://docs.dapr.io/developing-applications/building-blocks/pubsub/pubsub-overview/) and [StateStore](https://docs.dapr.io/developing-applications/building-blocks/state-management/state-management-overview/). 
 Both of these components will use Redis as their implementation. 
 
-So before deploying our applications let's configure these components to connect the Redis instance that we created before. 
+So before deploying our applications, let's configure these components to connect the Redis instance we created. 
 
 Create the StateStore component applying this resource to Kubernetes by running:
 
@@ -104,7 +104,7 @@ auth:
 EOF
 ```
 
-Once we have the PubSub component configured, we can register Subscritions to define who and where notifications will be sent when new messages arrive to the `notification` topic.
+Once configured the PubSub component, we can register Subscriptions to define who and where notifications will be sent when new messages arrive to the `notification` topic.
 
 Create the Subscription component applying this resource to Kubernetes by running:
 
@@ -125,18 +125,13 @@ EOF
 
 Finally, let's install Dapr Ambient and three applications that uses the Dapr StateStore and PubSub components.
 
-First let's add the Dapr Ambient Helm Repository:
-```
-helm add repo ambient https://salaboy.github.io/helm/
-helm repo update
-```
-Then install Dapr Ambient Helm Chart running this:
+Install Dapr Ambient Helm Chart running this:
 
 ```sh
-  helm install my-ambient-dapr-ambient ambient/dapr-ambient --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc
+  helm install my-ambient oci://docker.io/daprio/dapr-ambient-chart --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc --set ambient.remotePort=80
 ```
 
-Now that we have the Dapr control plane, Redis, the PubSub and StateStore component and our Dapr Ambient instance let's deploy the example apps:
+Now that we have the Dapr control plane, Redis, the PubSub and StateStore component, and our Dapr Ambient instance, let's deploy the example apps:
 
 These are standard Kubernetes applications, using `Deployments` and `Services`.
 ```sh
@@ -147,10 +142,10 @@ If you want to see the implementation's detail, you [can access this repository]
 
 ### Storing data using the write-values application
 
-Let's submit a value to the `write-values` service, but first let's use `kubectl port-forward` to be able to reach the service which is running inside our cluster:
+Let's submit a value to the `write-values` service, but first, let's use `kubectl port-forward` to be able to reach the service which is running inside our cluster:
 
 ```sh
-  kubectl port-forward svc/write-values-svc 8080:8080
+  kubectl port-forward svc/write-values-svc 8080:80
 ```
 
 Now you can send an HTTP request to the application:
@@ -162,13 +157,13 @@ Now you can send an HTTP request to the application:
 
 You can see the log using `kubectl logs -f <pod>`
 
-At this point the `subscriber` application has been received the notification from `dapr-ambient`. You can see this, with the same way, using `kubectl logs -f <pod>`.
+At this point the `subscriber` application has received the notification from `dapr-ambient`. You can see this, with the same way, using `kubectl logs -f <pod>`.
 
-### Getting the message on subscriber application
+### Getting the message on the subscriber application
 
-When the application `write-values` save a value on Redis, after it is published an event to topic `notifications`.
+When the application `write-values` save a value on Redis, after it is published, an event to topic `notifications`.
 
-You can see the logs following those steps:
+You can see the logs following these steps:
 
 Execute the following command:
 ```sh
@@ -200,10 +195,10 @@ Subscriber received on /notifications: 10
 
 ### Getting the average fom read-values application
 
-The `read-values` applications gets all values from StateStore and calculates the average.
+The `read-values` application gets all values from StateStore and calculates the average.
 
 ```sh
-  kubectl port-forward svc/read-values-svc 8888:8080
+  kubectl port-forward svc/read-values-svc 8888:80
 ```
 
 After, you can make a request to `read-values-svc`:
@@ -212,7 +207,7 @@ After, you can make a request to `read-values-svc`:
   curl http://localhost:8888
 ```
 
-The response should looks like it:
+The response should look like it:
 
 ```
 10
@@ -220,5 +215,5 @@ The response should looks like it:
 
 ## Get involved
 
-If you want to contribute to Dapr Ambient please get in touch, create an issue or submit a Pull Request. 
-You can also check the Project Roadmap to see what is coming or to find how you can help us to get the next version done. 
+If you want to contribute to Dapr Ambient please get in touch, create an issue, or submit a Pull Request. 
+You can also check the Project Roadmap to see what is coming or to find out how you can help us to get the next version done. 
