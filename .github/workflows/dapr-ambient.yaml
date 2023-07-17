@@ -90,13 +90,23 @@ jobs:
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
+      
+      - name: setup helm
+        run: |
+          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+          sudo apt-get install apt-transport-https --yes
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+          sudo apt-get update
+          sudo apt-get install helm
 
-      - name: Interact with the cluster
+      - name: Install helm chart
         run: |
           kubectl config use-context kind-chart-testing
           kubectl get nodes
+          helm install dapr-ambient chart/dapr-ambient --dry-run
+          helm install dapr-ambient chart/dapr-ambient
         shell: bash 
-
+      
   publish:
     name: Publish binaries
     needs: build
