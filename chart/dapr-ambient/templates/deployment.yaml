@@ -6,6 +6,9 @@ metadata:
   labels:
     {{- include "dapr-ambient.labels" . | nindent 4 }}
 spec:
+  selector:
+    matchLabels:
+      {{- include "dapr-ambient.selectorLabels" . | nindent 6 }}
   replicas: {{ .Values.ambient.deployment.replicas | default "1" | int }}
 {{ include "daemon-deploy-shared" .  }}
 {{- end -}}
