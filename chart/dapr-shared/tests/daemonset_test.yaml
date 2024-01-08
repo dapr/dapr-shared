@@ -3,26 +3,26 @@ suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
-  - it: when the ambient.strategy is daemonset should be create the daemonset resource
+  - it: when the shared.strategy is daemonset should be create the daemonset resource
     values:
       - ./values/required.yaml
     set:
-      ambient.strategy: daemonset
+      shared.strategy: daemonset
     asserts:
       - isAPIVersion:
           of: apps/v1
 
-  - it: should fail if ambient.appId is not defined
+  - it: should fail if shared.appId is not defined
     set:
-      ambient.remoteURL: https://local
+      shared.remoteURL: https://local
     asserts:
       - failedTemplate:
-          errorMessage: .Values.ambient.appId is required
+          errorMessage: .Values.shared.appId is required
 
-  - it: should not fail if ambient.appId is defined
+  - it: should not fail if shared.appId is defined
     set:
-      ambient.remoteURL: https://local
-      ambient.appId: appId
+      shared.remoteURL: https://local
+      shared.appId: appId
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[9]
@@ -32,7 +32,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         remoteURL: https://local
         appId: some-id
       tolerations:
@@ -82,7 +82,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient.initContainer.image.pullPolicy: Always
+      shared.initContainer.image.pullPolicy: Always
     asserts:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
@@ -90,7 +90,7 @@ tests:
   
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-system for spec.template.spec.containers[0].env when
-        ambient.controlPlane.namespace is empty
+        shared.controlPlane.namespace is empty
     values:
       - ./values/required.yaml
     asserts:
@@ -102,11 +102,11 @@ tests:
 
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-namespace for spec.template.spec.containers[0].env when
-        ambient.controlPlane.namespace is equal to dapr-namespace
+        shared.controlPlane.namespace is equal to dapr-namespace
     values:
       - ./values/required.yaml
     set:
-      ambient.controlPlane.namespace: dapr-namespace
+      shared.controlPlane.namespace: dapr-namespace
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -118,7 +118,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         daprd:
           image:
             registry: https://local
@@ -133,7 +133,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient.daprd.image.pullPolicy: Always
+      shared.daprd.image.pullPolicy: Always
     asserts:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
@@ -205,43 +205,43 @@ tests:
           path: spec.template.spec.containers[0].args[19]
           value: --app-channel-address=https://local
 
-  - it: should fail when ambient.remotePort is empty
+  - it: should fail when shared.remotePort is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.remotePort:
+      shared.remotePort:
     asserts:
       - failedTemplate:
-          errorMessage: .Values.ambient.remotePort is required
+          errorMessage: .Values.shared.remotePort is required
 
-  - it: should fail when ambient.daprd.app.protocol is empty
+  - it: should fail when shared.daprd.app.protocol is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.daprd.app.protocol:
+      shared.daprd.app.protocol:
     asserts:
       - failedTemplate:
-          errorMessage: .Values.ambient.daprd.app.protocol is required
+          errorMessage: .Values.shared.daprd.app.protocol is required
 
-  - it: should set --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80 when ambient.controlPlane.operatorAddress is empty
+  - it: should set --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80 when shared.controlPlane.operatorAddress is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.controlPlane.operatorAddress: 
+      shared.controlPlane.operatorAddress: 
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[12]
           value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
    
-  - it: should set --control-plane-address=control.plane.address:80 when ambient.controlPlane.operatorAddress is equal to control.plane.address:80
+  - it: should set --control-plane-address=control.plane.address:80 when shared.controlPlane.operatorAddress is equal to control.plane.address:80
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.controlPlane.operatorAddress: control.plane.address:80
+      shared.controlPlane.operatorAddress: control.plane.address:80
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[12]
@@ -249,12 +249,12 @@ tests:
 
   - it: |
       should set --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005 
-        when ambient.controlPlane.placementServerAddress is empty
+        when shared.controlPlane.placementServerAddress is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.controlPlane.operatorAddress: 
+      shared.controlPlane.operatorAddress: 
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[13]
@@ -262,45 +262,45 @@ tests:
    
   - it: |
       should set --placement-host-address=placement.host.address:80 
-        when ambient.controlPlane.placementServerAddress is equal to placement.host.address:80
+        when shared.controlPlane.placementServerAddress is equal to placement.host.address:80
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient.controlPlane.operatorAddress: control.plane.address:80
+      shared.controlPlane.operatorAddress: control.plane.address:80
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[12]
           value: --control-plane-address=control.plane.address:80
   
-  # - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
+  # - it: should set APP_API_TOKEN if shared.daprd.app.token is true
   #   values:
   #     - ../values.yaml
   #     - ./values/required.yaml
   #   set:
-  #     ambient.daprd.app.token: true
+  #     shared.daprd.app.token: true
   #   asserts:
   #     - lengthEqual:
   #         path: spec.template.spec.containers[0].env
   #         count: 8
 
-  # - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
+  # - it: should not set APP_API_TOKEN if shared.daprd.app.token is false
   #   values:
   #     - ../values.yaml
   #     - ./values/required.yaml
   #   set:
-  #     ambient.daprd.app.token: false
+  #     shared.daprd.app.token: false
   #   asserts:
   #     - lengthEqual:
   #         path: spec.template.spec.containers[0].env
   #         count: 7
 
-  # - it: should set APP_API_TOKEN if ambient.daprd.app.token is true
+  # - it: should set APP_API_TOKEN if shared.daprd.app.token is true
   #   values:
   #     - ../values.yaml
   #     - ./values/required.yaml
   #   set:
-  #     ambient.daprd.app.token: true
+  #     shared.daprd.app.token: true
   #   asserts:
   #     - contains:
   #         path: spec.template.spec.containers[0].env
@@ -309,14 +309,14 @@ tests:
   #           valueFrom:
   #             secretKeyRef:
   #               key: dapr-api-token
-  #               name: RELEASE-NAME-dapr-ambient
+  #               name: RELEASE-NAME-dapr-shared
 
-  # - it: should not set APP_API_TOKEN if ambient.daprd.app.token is false
+  # - it: should not set APP_API_TOKEN if shared.daprd.app.token is false
   #   values:
   #     - ../values.yaml
   #     - ./values/required.yaml
   #   set:
-  #     ambient.daprd.app.token: true
+  #     shared.daprd.app.token: true
   #   asserts:
   #     - notContains:
   #         path: spec.template.spec.containers[0].env
@@ -329,7 +329,7 @@ tests:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         daprd:
           httpPort: 1111
           grpcPort: 2222
@@ -358,7 +358,7 @@ tests:
               protocol: TCP
 
   - it: |
-      when ambient.strategy is daemonset the spec.replicas should be empty
+      when shared.strategy is daemonset the spec.replicas should be empty
     values:
       - ./values/required.yaml
     asserts:

@@ -12,3 +12,4 @@ spec:
   replicas: {{ .Values.ambient.deployment.replicas | default "1" | int }}
 {{ include "daemon-deploy-shared" .  }}
 {{- end -}}
+

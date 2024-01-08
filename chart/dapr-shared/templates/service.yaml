@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
   labels:
-    {{- include "dapr-ambient.labels" . | nindent 4 }}
+    {{- include "dapr-shared.labels" . | nindent 4 }}
 spec:
-  type: {{ default "ClusterIP" .Values.ambient.service.type }}
+  type: {{ default "ClusterIP" .Values.shared.service.type }}
   ports:
     - name: dapr-http
       port: 80
@@ -24,4 +24,4 @@ spec:
       protocol: TCP
       targetPort: 9090
   selector:
-    {{- include "dapr-ambient.selectorLabels" . | nindent 4 }}
+    {{- include "dapr-shared.selectorLabels" . | nindent 4 }}
