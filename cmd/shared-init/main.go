@@ -27,7 +27,7 @@ const (
 var configMapName string
 
 func main() {
-	log.Println("executing dapr-ambient-init")
+	log.Println("executing dapr-shared-init")
 	rootCmd := NewRootCmd()
 	rootCmd.Execute()
 }
@@ -67,7 +67,7 @@ func (s *daprSidecarClient) Get(ctx context.Context, ns string) (string, string,
 func NewRootCmd() *cobra.Command {
 
 	rootCmd := &cobra.Command{
-		Use: "ambient-init",
+		Use: "shared-init",
 	}
 	rootCmd.AddCommand(NewInitCmd())
 	rootCmd.AddCommand(NewRemoveCmd())
@@ -83,7 +83,7 @@ func NewInitCmd() *cobra.Command {
 		},
 	}
 
-	initCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-ambient-configmap", "--config-map=value")
+	initCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-shared-configmap", "--config-map=value")
 	_ = initCmd.MarkPersistentFlagRequired("config-map")
 
 	return initCmd
@@ -98,7 +98,7 @@ func NewRemoveCmd() *cobra.Command {
 		},
 	}
 
-	removeCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-ambient-configmap", "--config-map=value")
+	removeCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-shared-configmap", "--config-map=value")
 	_ = removeCmd.MarkPersistentFlagRequired("config-map")
 
 	return removeCmd

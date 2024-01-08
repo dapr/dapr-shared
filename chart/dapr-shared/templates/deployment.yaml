@@ -1,0 +1,11 @@
+{{- if eq .Values.shared.strategy "deployment" -}}
+apiVersion: apps/v1
+kind: "Deployment"
+metadata:
+  name: {{ include "dapr-shared.fullname" . }}
+  labels:
+    {{- include "dapr-shared.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.shared.deployment.replicas | default "1" | int }}
+{{ include "daemon-deploy-shared" .  }}
+{{- end -}}

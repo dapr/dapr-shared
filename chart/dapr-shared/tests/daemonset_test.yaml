@@ -3,26 +3,26 @@ suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
-  - it: when the ambient.strategy is daemonset should be create the daemonset resource
+  - it: when the shared.strategy is daemonset should be create the daemonset resource
     values:
       - ./values/required.yaml
     set:
-      ambient.strategy: daemonset
+      shared.strategy: daemonset
     asserts:
       - isAPIVersion:
           of: apps/v1
 
-  - it: should fail if ambient.appId is not defined
+  - it: should fail if shared.appId is not defined
     set:
-      ambient.remoteURL: https://local
+      shared.remoteURL: https://local
     asserts:
       - failedTemplate:
-          errorMessage: .Values.ambient.appId is required
+          errorMessage: .Values.shared.appId is required
 
-  - it: should not fail if ambient.appId is defined
+  - it: should not fail if shared.appId is defined
     set:
-      ambient.remoteURL: https://local
-      ambient.appId: appId
+      shared.remoteURL: https://local
+      shared.appId: appId
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[9]

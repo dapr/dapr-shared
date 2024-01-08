@@ -1,8 +1,8 @@
-{{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-ambient-secret-reader") }}
+{{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-shared-secret-reader") }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: dapr-ambient-secret-reader
+  name: dapr-shared-secret-reader
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -12,21 +12,21 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "dapr-ambient.fullname" . }}-secret-reader
+  name: {{ include "dapr-shared.fullname" . }}-secret-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ include "dapr-ambient.serviceAccountName" . }}
+  name: {{ include "dapr-shared.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: dapr-ambient-secret-reader
+  name: dapr-shared-secret-reader
 ---
-{{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-ambient-configmap-creator") }}
+{{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-shared-configmap-creator") }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: dapr-ambient-configmap-creator
+  name: dapr-shared-configmap-creator
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -36,12 +36,12 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "dapr-ambient.fullname" . }}-configmap-creator
+  name: {{ include "dapr-shared.fullname" . }}-configmap-creator
 subjects:
 - kind: ServiceAccount
-  name: {{ include "dapr-ambient.serviceAccountName" . }}
+  name: {{ include "dapr-shared.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: dapr-ambient-configmap-creator
+  name: dapr-shared-configmap-creator

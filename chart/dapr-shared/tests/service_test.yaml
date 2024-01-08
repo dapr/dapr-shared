@@ -7,7 +7,7 @@ tests:
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         service:
           type: "ClusterIP"
     asserts:
@@ -15,11 +15,11 @@ tests:
           path: spec.type
           value: "ClusterIP"
 
-  - it: should set the service type when the .Values.ambient.service.type is empty
+  - it: should set the service type when the .Values.shared.service.type is empty
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         service:
           type: 
     asserts:

@@ -1,5 +1,5 @@
 FROM busybox:1.34
 
-COPY ambient-init ambient-init
+COPY shared-init shared-init
 
-ENTRYPOINT [ "./ambient-init" ]
+ENTRYPOINT [ "./shared-init" ]

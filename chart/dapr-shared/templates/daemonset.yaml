@@ -1,0 +1,13 @@
+{{- if eq .Values.shared.strategy "daemonset" -}}
+apiVersion: apps/v1
+kind: "DaemonSet"
+metadata:
+  name: {{ include "dapr-shared.fullname" . }}
+  labels:
+    {{- include "dapr-shared.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "dapr-shared.selectorLabels" . | nindent 6 }}
+{{ include "daemon-deploy-shared" . }}
+{{- end -}}
