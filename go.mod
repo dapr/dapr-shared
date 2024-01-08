@@ -1,4 +1,4 @@
-module github.com/salaboy/dapr-ambient
+module github.com/salaboy/dapr-shared
 
 go 1.19
 

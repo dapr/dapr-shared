@@ -11,7 +11,7 @@
 # limitations under the License.
 #
 
-name: dapr-ambient-init
+name: dapr-shared-init
 
 on:
   pull_request:
@@ -70,12 +70,12 @@ jobs:
       
       - name: Copy out file from volume
         run: |
-          sudo cp ./ambient-init ${{ env.ARCHIVE_OUTDIR }}/ambient-init
+          sudo cp ./shared-init ${{ env.ARCHIVE_OUTDIR }}/shared-init
 
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
-          name: ambient-init
+          name: shared-init
           path: ${{ env.ARCHIVE_OUTDIR }}
 
   publish:
@@ -98,10 +98,10 @@ jobs:
           REPO_OWNER=${{ github.repository_owner }}
           # Lowercase the value
           echo "REPO_OWNER=${REPO_OWNER,,}" >>${GITHUB_ENV}
-      - name: "download artifact: ambient-init"
+      - name: "download artifact: shared-init"
         uses: actions/download-artifact@master
         with:
-          name: ambient-init
+          name: shared-init
           path: ${{ env.ARCHIVE_OUTDIR }}
       - name: generate checksum files
         run: cd ${{ env.ARCHIVE_OUTDIR }} && for i in *; do sha256sum -b $i > "$i.sha256"; done && cd -
@@ -121,12 +121,12 @@ jobs:
           OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
-          echo "Uploading Dapr-Ambient Runtime Binaries to GitHub Release"
+          echo "Uploading Dapr-Shared Runtime Binaries to GitHub Release"
           github-release upload \
             --owner $OWNER_NAME \
             --repo $REPO_NAME \
             --tag "v${REL_VERSION}" \
-            --release-name "Dapr-Ambient Runtime v${REL_VERSION}" \
+            --release-name "Dapr-Shared Runtime v${REL_VERSION}" \
             --body "${RELEASE_BODY}" \
             --prerelease true \
             ${RELEASE_ARTIFACT[*]}
@@ -164,9 +164,9 @@ jobs:
       
       - name: Build & Push Images
         env:
-          KO_DOCKER_REPO: ${{ vars.DOCKER_DAPRIO_REGISTRY }}/dapr-ambient
+          KO_DOCKER_REPO: ${{ vars.DOCKER_DAPRIO_REGISTRY }}/dapr-shared
         run: |
-          ko build cmd/ambient-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION} --bare
+          ko build cmd/shared-init/main.go --platform=linux/amd64,linux/arm64 --tags ${REL_VERSION} --bare
      
   helm:
     runs-on: ubuntu-latest
@@ -190,12 +190,12 @@ jobs:
         run: helm plugin install https://github.com/quintush/helm-unittest
       
       - name: execute unit tests
-        run: helm unittest chart/dapr-ambient
+        run: helm unittest chart/dapr-shared
       
       - name: Update init-container tag
         run: |
-          sed -i -e "s|tag: latest|tag: ${REL_VERSION}|g" ./chart/dapr-ambient/values.yaml
-          cat ./chart/dapr-ambient/values.yaml
+          sed -i -e "s|tag: latest|tag: ${REL_VERSION}|g" ./chart/dapr-shared/values.yaml
+          cat ./chart/dapr-shared/values.yaml
       
       - name: Container Registry login
         uses: docker/login-action@v2
@@ -208,7 +208,7 @@ jobs:
       - name: Package & Push Helm Chart
         run : |
           helm package \
-          ./chart/dapr-ambient \
+          ./chart/dapr-shared \
           --version ${REL_VERSION}
-          helm push dapr-ambient-chart-${REL_VERSION}.tgz oci://docker.io/${{ vars.DOCKER_DAPRIO_REGISTRY }}
+          helm push dapr-shared-chart-${REL_VERSION}.tgz oci://docker.io/${{ vars.DOCKER_DAPRIO_REGISTRY }}
         shell: bash

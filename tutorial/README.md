@@ -1,9 +1,9 @@
-# Dapr Ambient with KinD
-This tutorial provides step-by-step instructions for installing Dapr Ambient and configuring a set of applications to work with it.
+# Dapr Shared with KinD
+This tutorial provides step-by-step instructions for installing Dapr Shared and configuring a set of applications to work with it.
 
 ## Prerequisites and Installation
 
-Before proceeding, please make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Ambient.
+Before proceeding, please make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Shared.
 
 To get started, make sure you have the following CLIs installed:
 
@@ -22,7 +22,7 @@ To get started, make sure you have the following CLIs installed:
 Here, you will create a simple Kubernetes cluster with KinD defaults running the following command:
 
 ```bash
-  kind create cluster --name dapr-ambient
+  kind create cluster --name dapr-shared
 ```
 
 ## Installing Redis into the KinD cluster:
@@ -41,7 +41,7 @@ Finally, let's install the Dapr Control Plane:
   helm repo add dapr https://dapr.github.io/helm-charts/
   helm repo update
   helm upgrade --install dapr dapr/dapr \
-  --version=1.11.0 \
+  --version=1.12.3 \
   --namespace dapr-system \
   --create-namespace \
   --wait
@@ -121,24 +121,24 @@ spec:
 EOF
 ```
 
-## Installing Dapr Ambient and all applications
+## Installing Dapr Shared and all applications
 
-Finally, let's install Dapr Ambient and three applications that uses the Dapr StateStore and PubSub components.
+Finally, let's install Dapr Shared and three applications that uses the Dapr StateStore and PubSub components.
 
-Install Dapr Ambient Helm Chart running this:
+Install Dapr Shared Helm Chart running this:
 
 ```sh
-  helm install my-ambient oci://docker.io/daprio/dapr-ambient-chart --set ambient.appId=my-dapr-app --set ambient.remoteURL=subscriber-svc --set ambient.remotePort=80
+  helm install my-dapr-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=my-dapr-app --set shared.remoteURL=subscriber-svc --set shared.remotePort=80
 ```
 
-Now that we have the Dapr control plane, Redis, the PubSub and StateStore component, and our Dapr Ambient instance, let's deploy the example apps:
+Now that we have the Dapr control plane, Redis, the PubSub and StateStore component, and our Dapr Shared instance, let's deploy the example apps:
 
 These are standard Kubernetes applications, using `Deployments` and `Services`.
 ```sh
-  kubectl apply -f https://raw.githubusercontent.com/salaboy/dapr-ambient-examples/main/apps.yaml
+  kubectl apply -f https://raw.githubusercontent.com/salaboy/dapr-shared-examples/main/apps.yaml
 ```
 
-If you want to see the implementation's detail, you [can access this repository](https://github.com/salaboy/dapr-ambient-examples).
+If you want to see the implementation's detail, you [can access this repository](https://github.com/salaboy/dapr-shared-examples).
 
 ### Storing data using the write-values application
 
@@ -157,7 +157,7 @@ Now you can send an HTTP request to the application:
 
 You can see the log using `kubectl logs -f <pod>`
 
-At this point the `subscriber` application has received the notification from `dapr-ambient`. You can see this, with the same way, using `kubectl logs -f <pod>`.
+At this point the `subscriber` application has received the notification from `dapr-shared`. You can see this, with the same way, using `kubectl logs -f <pod>`.
 
 ### Getting the message on the subscriber application
 
@@ -215,5 +215,5 @@ The response should look like it:
 
 ## Get involved
 
-If you want to contribute to Dapr Ambient please get in touch, create an issue, or submit a Pull Request. 
+If you want to contribute to Dapr Shared please get in touch, create an issue, or submit a Pull Request. 
 You can also check the Project Roadmap to see what is coming or to find out how you can help us to get the next version done. 

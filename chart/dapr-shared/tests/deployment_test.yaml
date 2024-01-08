@@ -3,20 +3,20 @@ suite: test deplyment
 templates:
   - deployment.yaml
 tests:
-  - it: when the ambient.strategy is deployment should not create the daemonset resource
+  - it: when the shared.strategy is deployment should not create the daemonset resource
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         strategy: "deployment"
     asserts:
       - isKind: 
           of: "Deployment"
-  - it: when ambient.deployment.replicas is null the quantity of replicas should be 1
+  - it: when shared.deployment.replicas is null the quantity of replicas should be 1
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         strategy: deployment
         deployment:
           replicas:
@@ -25,12 +25,12 @@ tests:
           path: spec.replicas
           value: 1
   - it: |
-      when ambient.deployment.replicas is 3 and ambient.strategy is deployment the 
+      when shared.deployment.replicas is 3 and shared.strategy is deployment the 
         spec.replicas filed should be 3
     values:
       - ./values/required.yaml
     set:
-      ambient:
+      shared:
         strategy: deployment
         deployment:
           replicas: 3

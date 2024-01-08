@@ -1,11 +1,11 @@
-fullnameOverride: dapr-ambient
-ambient:
-  # -- The default strategy to run dapr in ambient mode. Possible values `daemonset`, `deployment`.
+fullnameOverride: dapr-shared
+shared:
+  # -- The default strategy to run dapr in shared mode. Possible values `daemonset`, `deployment`.
   strategy: daemonset
   # -- The remote port.
   remotePort: 0
   deployment:
-    # -- The quantity of replicas. This property is set only when `ambient.strategy` is equal to `deployment`
+    # -- The quantity of replicas. This property is set only when `shared.strategy` is equal to `deployment`
     replicas: 1
   log:
     # -- The daprd log level.
@@ -29,11 +29,11 @@ ambient:
     # -- The dapr API token.
     token: ""
     image:  
-      # -- The dapr-ambient image registry.
+      # -- The dapr-shared image registry.
       registry: "docker.io/daprio"
-      # -- The dapr-ambient image name.
-      name: dapr-ambient
-      # -- The dapr-ambient-init image tag.
+      # -- The dapr-shared image name.
+      name: dapr-shared
+      # -- The dapr-shared-init image tag.
       tag: latest
       # -- The init container pull policy.
       pullPolicy: Always
