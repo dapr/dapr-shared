@@ -1,15 +1,14 @@
-{{- if eq .Values.ambient.strategy "deployment" -}}
+{{- if eq .Values.shared.strategy "deployment" -}}
 apiVersion: apps/v1
 kind: "Deployment"
 metadata:
-  name: {{ include "dapr-ambient.fullname" . }}
+  name: {{ include "dapr-shared.fullname" . }}
   labels:
-    {{- include "dapr-ambient.labels" . | nindent 4 }}
+    {{- include "dapr-shared.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "dapr-ambient.selectorLabels" . | nindent 6 }}
-  replicas: {{ .Values.ambient.deployment.replicas | default "1" | int }}
+      {{- include "dapr-shared.selectorLabels" . | nindent 6 }}
+  replicas: {{ .Values.shared.deployment.replicas | default "1" | int }}
 {{ include "daemon-deploy-shared" .  }}
 {{- end -}}
-
