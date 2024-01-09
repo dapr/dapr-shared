@@ -188,7 +188,7 @@ tests:
           value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
       - equal:
           path: spec.template.spec.containers[0].args[14]
-          value: --sentry-address=dapr-sentry.dapr-system.svc.cluster.local
+          value: --sentry-address=dapr-sentry.dapr-system.svc.cluster.local:80
       - equal:
           path: spec.template.spec.containers[0].args[15]
           value: --enable-metrics=true
