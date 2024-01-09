@@ -45,7 +45,7 @@
           - --app-protocol={{ required ".Values.shared.daprd.app.protocol is required" .Values.shared.daprd.app.protocol }}
           - --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.shared.controlPlane.operatorAddress }}
           - --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.shared.controlPlane.placementServerAddress }}
-          - --sentry-address={{ default "dapr-sentry.dapr-system.svc.cluster.local" .Values.shared.controlPlane.sentryAddress }}
+          - --sentry-address={{ default "dapr-sentry.dapr-system.svc.cluster.local:80" .Values.shared.controlPlane.sentryAddress }}
           - --enable-metrics={{ .Values.shared.daprd.metrics.enabled }}
           - --metrics-port={{ .Values.shared.daprd.metrics.port }}
           - --enable-mtls={{ .Values.shared.daprd.mtls.enabled }}
