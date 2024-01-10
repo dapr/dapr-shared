@@ -25,6 +25,19 @@ Here, you will create a simple Kubernetes cluster with KinD defaults running the
   kind create cluster --name dapr-shared
 ```
 
+Make sure to install the Dapr Control Plane into the cluster with: 
+
+```
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+helm upgrade --install dapr dapr/dapr \
+--version=1.12.3 \
+--namespace dapr-system \
+--create-namespace \
+--wait
+```
+
+
 ## Installing Redis into the KinD cluster:
 
 Let's create a new Redis Instance for our application's services to use: 

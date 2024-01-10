@@ -10,6 +10,14 @@
         {{- include "dapr-shared.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
+      - name: dapr-identity-token
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              audience: dapr.io/sentry
+              expirationSeconds: 7200
+              path: token
       - name: shared-data
         emptyDir: {}
       {{- with .Values.imagePullSecrets }}
@@ -116,6 +124,10 @@
             httpGet:
               path: /v1.0/healthz
               port: public-http
+          volumeMounts:
+          - mountPath: /var/run/secrets/dapr.io/sentrytoken
+            name: dapr-identity-token
+            readOnly: true    
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
