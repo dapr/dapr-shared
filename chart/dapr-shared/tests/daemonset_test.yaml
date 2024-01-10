@@ -72,7 +72,7 @@ tests:
       - ./values/required.yaml
     asserts:
       - equal:
-          path: spec.template.metadata.annotations.dapr.io/app-id
+          path: spec.template.metadata.annotations["dapr.io/app-id"]
           value: appId
 
   - it: should set annotation
