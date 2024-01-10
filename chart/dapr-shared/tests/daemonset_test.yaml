@@ -67,6 +67,14 @@ tests:
           path: spec.template.spec.imagePullSecrets.name
           value: regcred
 
+  - it: should set app-id annotation
+    values:
+      - ./values/required.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.dapr.io/app-id
+          value: appId
+
   - it: should set annotation
     values:
       - ./values/required.yaml
@@ -76,7 +84,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.metadata.annotations.imageregistry
-          value: https://local
+          value: https://local     
   
   - it: should set spec.template.spec.containers[0].pullPolicy
     values:
@@ -100,6 +108,18 @@ tests:
             name: DAPR_CONTROL_PLANE_NAMESPACE
             value: dapr-system
 
+  - it: |
+      should set DAPR_CONTROLPLANE_TRUST_DOMAIN=cluster.local for spec.template.spec.containers[0].env when
+        shared.controlPlane.trustDomain is empty
+    values:
+      - ./values/required.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: DAPR_CONTROLPLANE_TRUST_DOMAIN
+            value: cluster.local
+            
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-namespace for spec.template.spec.containers[0].env when
         shared.controlPlane.namespace is equal to dapr-namespace
