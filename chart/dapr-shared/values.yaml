@@ -15,6 +15,8 @@ shared:
   controlPlane:
     # -- Namespace where Dapr Control Plane is.
     namespace: "dapr-system"
+    # -- Trust Domain used by the Dapr Control Plane
+    trustDomain: "cluster.local"
   serviceAccount: 
     # -- Allows the option to create or not the service account.
     create: true 

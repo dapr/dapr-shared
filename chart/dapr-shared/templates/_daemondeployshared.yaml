@@ -2,6 +2,7 @@
   template:
     metadata:
       annotations:
+        dapr.io/app-id: {{ .Values.shared.appId }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -81,6 +82,8 @@
                 name: {{ include "dapr-shared.fullname" . }}
                 key: app-api-token
           {{- end }}
+          - name: DAPR_CONTROLPLANE_TRUST_DOMAIN
+            value: {{ .Values.shared.controlPlane.trustDomain }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
