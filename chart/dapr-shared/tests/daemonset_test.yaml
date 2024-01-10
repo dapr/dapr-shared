@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
-suite: test daemonset 
+suite: test daemonset
 templates:
   - daemonset.yaml
 tests:
@@ -11,6 +11,15 @@ tests:
     asserts:
       - isAPIVersion:
           of: apps/v1
+
+  - it: when the shared.strategy is daemonset selectorLabels should be set
+    values:
+      - ./values/required.yaml
+    set:
+      shared.strategy: daemonset
+    asserts:
+      - isNotNull:
+          path: spec.selector.matchLabels
 
   - it: should fail if shared.appId is not defined
     set:
@@ -84,8 +93,8 @@ tests:
     asserts:
       - equal:
           path: spec.template.metadata.annotations.imageregistry
-          value: https://local     
-  
+          value: https://local
+
   - it: should set spec.template.spec.containers[0].pullPolicy
     values:
       - ./values/required.yaml
@@ -95,7 +104,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
-  
+
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-system for spec.template.spec.containers[0].env when
         shared.controlPlane.namespace is empty
@@ -119,7 +128,7 @@ tests:
           content:
             name: DAPR_CONTROLPLANE_TRUST_DOMAIN
             value: cluster.local
-            
+
   - it: |
       should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-namespace for spec.template.spec.containers[0].env when
         shared.controlPlane.namespace is equal to dapr-namespace
@@ -134,7 +143,7 @@ tests:
             name: DAPR_CONTROL_PLANE_NAMESPACE
             value: dapr-namespace
 
-  - it: should set spec.template.spec.containers[0].image 
+  - it: should set spec.template.spec.containers[0].image
     values:
       - ./values/required.yaml
     set:
@@ -147,8 +156,8 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: https://local/daprd-image:v0.0.1  
-    
+          value: https://local/daprd-image:v0.0.1
+
   - it: should set spec.template.spec.containers[0].imagePullPolicy
     values:
       - ./values/required.yaml
@@ -158,7 +167,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
-  
+
   - it: should set spec.template.spec.containers[0].args
     values:
       - ../values.yaml
@@ -169,7 +178,7 @@ tests:
           value: /daprd
       - equal:
           path: spec.template.spec.containers[0].args[1]
-          value: --mode=kubernetes 
+          value: --mode=kubernetes
       - equal:
           path: spec.template.spec.containers[0].args[2]
           value: --log-level=info
@@ -250,12 +259,12 @@ tests:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress: 
+      shared.controlPlane.operatorAddress:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[12]
           value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
-   
+
   - it: should set --control-plane-address=control.plane.address:80 when shared.controlPlane.operatorAddress is equal to control.plane.address:80
     values:
       - ../values.yaml
@@ -274,12 +283,12 @@ tests:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress: 
+      shared.controlPlane.operatorAddress:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args[13]
           value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
-   
+
   - it: |
       should set --placement-host-address=placement.host.address:80 
         when shared.controlPlane.placementServerAddress is equal to placement.host.address:80
@@ -292,7 +301,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args[12]
           value: --control-plane-address=control.plane.address:80
-  
+
   # - it: should set APP_API_TOKEN if shared.daprd.app.token is true
   #   values:
   #     - ../values.yaml
@@ -343,7 +352,6 @@ tests:
   #         content:
   #           name: DAPR_API_TOKEN
 
-
   - it: should set ports
     values:
       - ../values.yaml
@@ -384,4 +392,18 @@ tests:
     asserts:
       - isNull:
           path: spec.replicas
-            
+
+  - it: when a shared.scheduling.nodeSelector is given it should be set
+    values:
+      - ./values/required.yaml
+    set:
+      shared:
+        strategy: daemonset
+        scheduling:
+          nodeSelector:
+            agentpool: backend
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.agentpool
+          value: backend
+

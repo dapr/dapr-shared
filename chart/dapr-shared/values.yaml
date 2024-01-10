@@ -39,6 +39,9 @@ shared:
       tag: latest
       # -- The init container pull policy.
       pullPolicy: Always
+  scheduling:
+    # -- node selector for shared Dapr
+    nodeSelector: {}
   daprd:
     app:
       # -- Dapr which protocol your application is using. Valid options are `http`` and `grpc``.

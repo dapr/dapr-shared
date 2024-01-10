@@ -10,8 +10,18 @@ tests:
       shared:
         strategy: "deployment"
     asserts:
-      - isKind: 
+      - isKind:
           of: "Deployment"
+
+  - it: when the shared.strategy is deployment selectorLabels should be set
+    values:
+      - ./values/required.yaml
+    set:
+      shared.strategy: "deployment"
+    asserts:
+      - isNotNull:
+          path: spec.selector.matchLabels
+
   - it: when shared.deployment.replicas is null the quantity of replicas should be 1
     values:
       - ./values/required.yaml
@@ -24,6 +34,7 @@ tests:
       - equal:
           path: spec.replicas
           value: 1
+
   - it: |
       when shared.deployment.replicas is 3 and shared.strategy is deployment the 
         spec.replicas filed should be 3
@@ -37,4 +48,19 @@ tests:
     asserts:
       - equal:
           path: spec.replicas
-          value:  3
+          value: 3
+
+  - it: when shared.scheduling.nodeSelector is given, it should be set
+    values:
+      - ./values/required.yaml
+    set:
+      shared:
+        strategy: deployment
+        scheduling:
+          nodeSelector:
+            agentpool: backend
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.agentpool
+          value: backend
+
