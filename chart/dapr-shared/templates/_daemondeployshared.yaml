@@ -136,4 +136,7 @@
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.shared.scheduling.nodeSelector }}
+      nodeSelector: {{- .Values.shared.scheduling.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
 {{ end -}}
