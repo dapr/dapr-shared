@@ -1,4 +1,3 @@
-fullnameOverride: dapr-shared
 shared:
   # -- The default strategy to run dapr in shared mode. Possible values `daemonset`, `deployment`.
   strategy: daemonset
@@ -36,7 +35,7 @@ shared:
       # -- The dapr-shared image name.
       name: dapr-shared
       # -- The dapr-shared-init image tag.
-      tag: latest
+      tag: 0.0.10
       # -- The init container pull policy.
       pullPolicy: Always
   scheduling:

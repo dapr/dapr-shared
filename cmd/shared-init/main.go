@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -70,7 +69,6 @@ func NewRootCmd() *cobra.Command {
 		Use: "shared-init",
 	}
 	rootCmd.AddCommand(NewInitCmd())
-	rootCmd.AddCommand(NewRemoveCmd())
 	return rootCmd
 }
 
@@ -87,21 +85,6 @@ func NewInitCmd() *cobra.Command {
 	_ = initCmd.MarkPersistentFlagRequired("config-map")
 
 	return initCmd
-}
-
-// NewRemoveCmd creates a new *cobra.Command for remove command.
-func NewRemoveCmd() *cobra.Command {
-	removeCmd := &cobra.Command{
-		Use: "remove",
-		Run: func(cmd *cobra.Command, args []string) {
-			RemoveHandler()
-		},
-	}
-
-	removeCmd.PersistentFlags().StringVar(&configMapName, "config-map", "dapr-shared-configmap", "--config-map=value")
-	_ = removeCmd.MarkPersistentFlagRequired("config-map")
-
-	return removeCmd
 }
 
 // InitHandler handles the init command.
@@ -128,20 +111,13 @@ func InitHandler() {
 
 	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, configMapName, metav1.GetOptions{})
 	if err == nil {
-		panic(fmt.Errorf("configmap %s already exists", configMapName))
+		err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Delete(ctx, configMapName, metav1.DeleteOptions{})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})
-	if err != nil {
-		panic(err)
-	}
-}
-
-// RemoveHandler handles remove command.
-func RemoveHandler() {
-	ctx := context.Background()
-	kubeClient := daprutils.GetKubeClient()
-	err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Delete(ctx, configMapName, metav1.DeleteOptions{})
 	if err != nil {
 		panic(err)
 	}

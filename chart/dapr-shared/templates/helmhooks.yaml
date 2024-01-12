@@ -1,22 +1,69 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "cm-remover-{{ .Release.Name }}"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-6"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: "cm-remover-{{ .Release.Name }}"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-6"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - "get"
+      - "delete"
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "cm-remover-{{ .Release.Name }}"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-5"
+subjects:
+  - kind: ServiceAccount
+    name: "cm-remover-{{ .Release.Name }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "cm-remover-{{ .Release.Name }}"
+---
+apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ include "dapr-shared.fullname" . }}-hook
+  name: "delete-cm-task-{{ .Release.Name }}"
   labels:
-    {{- include "dapr-shared.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
   annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
     "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-4"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
-  # This shows how to use a simple value. This will look for a passed-in value
-  # called restartPolicy. If it is not found, it will use the default value.
-  # {{default "Never" .restartPolicy}} is a slightly optimized version of the
-  # more conventional syntax: {{.restartPolicy | default "Never"}}
   restartPolicy: "Never"
-  serviceAccountName: {{ include "dapr-shared.serviceAccountName" . }}
+  serviceAccountName: "cm-remover-{{ .Release.Name }}"
   containers:
-  - name: shared-remove-hook
-    image: "{{ .Values.shared.initContainer.image.registry }}/{{ .Values.shared.initContainer.image.name }}:{{ .Values.shared.initContainer.image.tag }}"
-    args: 
-      - remove
-      - --config-map={{ .Release.Name }}-cm
+    - name: delete-cm
+      image: "rancher/kubectl:v1.22.6"
+      command: ["kubectl", "-n", "{{ .Release.Namespace }}", "delete", "cm", "{{ .Release.Name }}-shared-cm"]

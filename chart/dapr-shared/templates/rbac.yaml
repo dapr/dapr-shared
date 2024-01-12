@@ -2,7 +2,7 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: dapr-shared-secret-reader
+  name: {{ include "dapr-shared.fullname" . }}-secret-reader
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -20,13 +20,13 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: dapr-shared-secret-reader
+  name: {{ include "dapr-shared.fullname" . }}-secret-reader
 ---
 {{- if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "dapr-shared-configmap-creator") }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: dapr-shared-configmap-creator
+  name: {{ include "dapr-shared.fullname" . }}-configmap-creator
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -44,4 +44,4 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: dapr-shared-configmap-creator
+  name: {{ include "dapr-shared.fullname" . }}-configmap-creator
