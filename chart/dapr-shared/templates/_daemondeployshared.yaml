@@ -60,6 +60,7 @@
           - --enable-mtls={{ .Values.shared.daprd.mtls.enabled }}
           - --enable-api-logging={{ .Values.shared.daprd.apiLogging.enabled }}
           - --app-channel-address={{ .Values.shared.remoteURL }}
+          - --config={{ .Values.shared.daprd.config }}
           env:
           - name: DAPR_TRUST_ANCHORS
             valueFrom:
