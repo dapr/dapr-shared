@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.shared.appId }}-dapr
   labels:
     {{- include "dapr-shared.labels" . | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" .Values.shared.service.type }}
   ports:
     - name: dapr-http
-      port: 80
+      port: 3500
       protocol: TCP
       targetPort: 3500
     - name: dapr-grpc

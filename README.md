@@ -2,7 +2,7 @@
 
 Dapr Shared allows you to create Dapr Applications using the `daprd` Sidecar as a Kubernetes `Daemonset` or `Deployment`. This enables other use cases where Sidecars are not the best option.
 
-By running `daprd` as a Kubernetes `DaemonSet` resource, the `daprd` container will be running in each Kubernetes Node, reducing the network hops between the applications and Dapr. You can also choose to run
+By running `daprd` as a Kubernetes `DaemonSet` resource, the `daprd` container will be running in each Kubernetes Node, reducing the network hops between the applications and Dapr. You can also choose to run Dapr Shared as a Kubernetes `Deployment`, in which case, the Kubernetes scheduler will decide in which node the Dapr Shared instance will run.
 
 For each Dapr Application, you need to deploy this chart using different `shared.appId`s.
 
@@ -14,7 +14,7 @@ Before installing Dapr Shared, please ensure you have Dapr installed in your clu
 If you want to get started with Dapr Shared, you can easily create a new Dapr Shared instance by installing the official Helm Chart:
 
 ```
-helm install my-dapr-shared oci://registry-1.docker.io/daprio/dapr-shared-chart --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
+helm install my-shared-instance oci://registry-1.docker.io/daprio/dapr-shared-chart --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
 ```
 
 If you want to look at a step-by-step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
@@ -24,14 +24,12 @@ If you want to look at a step-by-step tutorial using some applications and inter
 To deploy this chart from the source you can run from inside the `chart/dapr-shared` directory:
 
 ```
-helm install my-shared . --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL>
-
+helm install my-shared . --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
 
 ```
 
-Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (for example, for scopes) and `<REMOTE_URL>` is a reachable URL where `dapr-shared` will forward notifications received by the Dapr sidecar.
+Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (for example, for scopes) and `<REMOTE_URL>` and `<REMOTE_PORT>` are a reachable URL and Port where the `dapr-shared` instance will forward subscriptions received by the Dapr sidecar.
 
-Future versions include forwarding notifications to multiple remote URLs.
 
 ## Customize Dapr Shared
 Customize Dapr Shared using custom Helm values
