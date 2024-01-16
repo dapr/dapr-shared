@@ -407,3 +407,15 @@ tests:
           path: spec.template.spec.nodeSelector.agentpool
           value: backend
 
+  - it: when shared.daprd.config is given, it should be set
+    values:
+      - ./values/required.yaml
+    set:
+      shared:
+        strategy: daemonset
+        daprd:
+          config: appconfig
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--config=appconfig"
