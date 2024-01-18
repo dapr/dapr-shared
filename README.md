@@ -6,6 +6,34 @@ By running `daprd` as a Kubernetes `DaemonSet` resource, the `daprd` container w
 
 For each Dapr Application, you need to deploy this chart using different `shared.appId`s.
 
+## Why Dapr Shared? 
+
+By default, when Dapr is installed into a Kubernetes Cluster, the Dapr Control Plane is in charge of injecting the `daprd` sidecar to workloads annotated with  Dapr annotations (`dapr.io/enabled: "true"`). This mechanism delegates the responsability of defining which workloads will be interacting with the Dapr APIs to the team in charge of deploying and configuring these workloads. Sidecars had the advantage of being co-located with your applications, so all communications between the application and the sidecar happens without involving the network.
+
+![sidecar](imgs/sidecar.png)
+
+While sidecars are the default strategy, there are some use cases that require other approaches. For example, you want to decouple the lifecycle of your workloads from the Dapr APIs. A typical example for this are Functions, or function as a service runtimes, which might automatically downscale your idle workloads to free up resources. For such cases, keeping the Dapr APIs and all the Dapr async functionalities (such as subcriptions) might be required. Dapr Shared was created exactly for this kind of scenarios. 
+
+Dapr Shared extends the Dapr sidecar model with two new deployment strategies: `DaemonSet` and `Deployment`.
+
+No matter which strategy you choose, it is important to understand that in most use cases you will have one instance of Dapr Shared (Helm Release) per service (app-id). This means that if you have an application composed by three microservices, each service is recommended to have it's own Dapr Shared instance. Check the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md), to see an application using Dapr Shared.
+
+### Dapr Shared: DeamonSet strategy
+
+[Kubernetes `DaemonSets`](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) allows you to define workloads that needs to be deployed once per node in the cluster. This enable workloads that are running in the same node to communicate with local `daprd` APIs, no matter where the Kubernetes Scheduler schedule your workload. 
+
+![daemonset](imgs/daemonset.png)
+
+Note that DaemonSet, because it install one instance per node, will consume more overall resources in your cluster.
+
+### Dapr Shared: Deployment strategy
+
+[Kubernetes `Deployments`}(https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) in the other hand, are installed once per cluster and the Kubernetes Scheduler decides, based on available resources, in which node the workload will be scheduled. For Dapr Shared, this means that your workload and the `daprd` instance might be located in separate nodes, which can introduce considerable network latency. 
+
+![deployment](imgs/deployment.png)
+
+
+
 ## Getting Started
 
 Before installing Dapr Shared, please ensure you have Dapr installed in your cluster.
