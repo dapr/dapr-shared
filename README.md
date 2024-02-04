@@ -81,6 +81,11 @@ Customize Dapr Shared using custom Helm values
 | shared.daprd.publicPort | int | `3501` | The HTTP public port for the Dapr API. |
 | shared.daprd.token | string | `""` | Dapr API token to use for token based API authentication. |
 | shared.daprd.config | string | `""` | Name of Dapr configuration specification to be used. |
+| shared.daprd.appHealth.enabled | bool | false | Enables the app health checks |
+| shared.daprd.appHealth.checkPath | string | `"/healthz"` | Path that Dapr invokes for health probes when the app channel is HTTP (this value is ignored if the app channel is using gRPC) |
+| shared.daprd.appHealth.probeInterval | int | `5` | Number of seconds between each health probe |
+| shared.daprd.appHealth.probeTimeout | int | `500` | Timeout in milliseconds for health probe requests |
+| shared.daprd.appHealth.threshold | int | `3` | Max number of consecutive failures before the app is considered unhealthy |
 | shared.deployment.replicas | int | `1` | The quantity of replicas. This property is set only when `shared.strategy` is equal to `deployment` |
 | shared.initContainer.image.name | string | `"dapr-shared"` | The dapr-shared image name. |
 | shared.initContainer.image.pullPolicy | string | `"Always"` | The init container pull policy. |
