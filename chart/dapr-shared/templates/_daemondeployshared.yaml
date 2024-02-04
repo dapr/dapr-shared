@@ -61,6 +61,13 @@
           - --enable-api-logging={{ .Values.shared.daprd.apiLogging.enabled }}
           - --app-channel-address={{ .Values.shared.remoteURL }}
           - --config={{ .Values.shared.daprd.config }}
+          {{- if .Values.shared.daprd.appHealth.enabled }}
+          - --enable-app-health-check={{ .Values.shared.daprd.appHealth.enabled }}
+          - --app-health-check-path={{ default "/healthz" .Values.shared.daprd.appHealth.checkPath }}
+          - --app-health-probe-interval={{ .Values.shared.daprd.appHealth.probeInterval }}
+          - --app-health-probe-timeout={{ .Values.shared.daprd.appHealth.probeTimeout }}
+          - --app-health-threshold={{ .Values.shared.daprd.appHealth.threshold }}
+          {{- end }}
           env:
           - name: DAPR_TRUST_ANCHORS
             valueFrom:

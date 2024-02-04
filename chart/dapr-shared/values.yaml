@@ -79,6 +79,17 @@ shared:
     apiLogging:
       # -- Enables API logging for the daprd.
       enabled: true
+    appHealth:
+      # -- Enables the app health checks
+      enabled: false
+      # -- Path that Dapr invokes for health probes when the app channel is HTTP (this value is ignored if the app channel is using gRPC)
+      path: "/healthz"
+      # -- Number of seconds between each health probe
+      probeInterval: 5
+      # -- Timeout in milliseconds for health probe requests
+      probeTimeout: 500
+      # -- Max number of consecutive failures before the app is considered unhealthy
+      threshold: 3
 # @ignored
 tolerations:
   # these tolerations are to have the daemonset runnable on control plane nodes
