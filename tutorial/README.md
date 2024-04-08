@@ -1,4 +1,5 @@
 # Dapr Shared with KinD
+
 This tutorial provides step-by-step instructions for installing Dapr Shared for a simple application composed with 3 services.
 
 ## Prerequisites and Installation
@@ -16,7 +17,6 @@ To get started, make sure you have the following CLIs installed:
 - [Helm](https://helm.sh/docs/intro/install/)
 
 
-
 ## Creating a local Kubernetes cluster with KinD: 
 
 Here, you will create a simple Kubernetes cluster with KinD defaults running the following command:
@@ -25,7 +25,7 @@ Here, you will create a simple Kubernetes cluster with KinD defaults running the
   kind create cluster
 ```
 
-Make sure to install the Dapr Control Plane into the cluster with: 
+Make sure to install the Dapr Control Plane into the cluster with:
 
 ```
 helm repo add dapr https://dapr.github.io/helm-charts/
@@ -36,7 +36,6 @@ helm upgrade --install dapr dapr/dapr \
 --create-namespace \
 --wait
 ```
-
 
 ## Installing application-infrastructure (PostgreSQL and Kafka):
 
@@ -56,7 +55,6 @@ Then:
 
 ```
 helm install postgresql oci://registry-1.docker.io/bitnamicharts/postgresql --version 12.5.7 --set "image.debug=true" --set "primary.initdb.user=postgres" --set "primary.initdb.password=postgres" --set "primary.initdb.scriptsConfigMap=pizza-init-sql" --set "global.postgresql.auth.postgresPassword=postgres" --set "primary.persistence.size=1Gi"
-
 ```
 
 ## Installing Dapr Components
@@ -78,9 +76,9 @@ Now we can create and configure the PubSub component to connect to Kafka. We can
 kubectl apply -f k8s/pubsub.yaml
 ```
 
-Once configured the PubSub component, we can register Subscriptions to define who and where notifications will be sent when new messages arrive to the `notification` topic.
+Once configured, the PubSub component can register Subscriptions to define who and where notifications will be sent when new messages arrive at the `notification` topic.
 
-Create the Subscription resource applying this file to Kubernetes by running:
+Create the Subscription resource by applying this file to Kubernetes by running:
 
 ```sh
 kubectl apply -f k8s/subscription.yaml
@@ -110,14 +108,15 @@ helm install pizza-delivery-shared oci://docker.io/daprio/dapr-shared-chart --se
 ```
 
 
-Now that we have our 3 Dapr Shared instances for our applicaation services, we can install the application Services. 
+Now that we have our 3 Dapr Shared instances for our application services, we can install the application Services. 
 
-These are standard Kubernetes applications, using `Deployments` and `Services`.
+These are standard Kubernetes applications using `Deployments` and `Services`:
+
 ```sh
   kubectl apply -f k8s/pizza-app.yaml
 ```
 
-This install all the application services. To avoid dealing with Ingresses you can access the application by using `kubectl port-forward`, run to access the application on port `8080`: 
+This installs all the application services. To avoid dealing with Ingresses, you can access the application by using `kubectl port-forward` to access the application on port `8080`: 
 
 ```
 kubectl port-forward svc/pizza-store 8080:80
@@ -127,14 +126,9 @@ Then you can point your browser to [`http://localhost:8080`](http://localhost:80
 
 ![Pizza Store](imgs/pizza-store.png)
 
-If you want to see the implementation's detail, you [can access this repository](https://github.com/salaboy/piza).
-
-
-
-
-
+If you want to see the implementation's details, you [can access this repository](https://github.com/salaboy/pizza).
 
 ## Get involved
 
-If you want to contribute to Dapr Shared please get in touch, create an issue, or submit a Pull Request. 
-You can also check the Project Roadmap to see what is coming or to find out how you can help us to get the next version done. 
+If you want to contribute to Dapr Shared, please get in touch, create an issue, or submit a Pull Request. 
+You can also check the Project Roadmap to see what is coming or to find out how you can help us get the next version done. 
