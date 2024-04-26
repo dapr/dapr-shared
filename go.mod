@@ -1,4 +1,4 @@
-module github.com/salaboy/dapr-shared
+module github.com/dapr/dapr-shared
 
 go 1.19
 
