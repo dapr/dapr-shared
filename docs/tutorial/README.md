@@ -46,7 +46,7 @@ Or use the Dapr CLI to install the latest version with the following command
 `dapr init -k`
 ## Running the Hello Kubernetes example
 
-We will be using the Dapr Statestore API and for that we will install a Redis instance into our cluster using Helm: 
+Next install a Redis instance into the cluster using Helm
 
 ```shell
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis --version 17.11.3 --set "architecture=standalone" --set "master.persistence.size=1Gi"
