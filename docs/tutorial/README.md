@@ -30,7 +30,7 @@ Create a Kubernetes cluster with KinD defaults by running the following command:
 kind create cluster
 ```
 
-Make sure to install the Dapr Control Plane into the cluster with:
+Next install a version of the Dapr control plane into the cluster:
 
 ```
 helm repo add dapr https://dapr.github.io/helm-charts/
