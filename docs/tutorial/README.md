@@ -9,7 +9,7 @@ Instead of deploying Dapr as a sidecar we are going to use Dapr Shared instances
 
 ## Prerequisites and Installation
 
-Before proceeding, please make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Shared.
+Before proceeding make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Shared.
 
 To get started, make sure you have the following CLIs installed:
 
