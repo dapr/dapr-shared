@@ -24,7 +24,7 @@ To get started, make sure you have the following CLIs installed:
 
 ## Creating a local Kubernetes cluster with KinD: 
 
-Here, you will create a simple Kubernetes cluster with KinD defaults running the following command:
+Create a Kubernetes cluster with KinD defaults by running the following command:
 
 ```bash
 kind create cluster
