@@ -60,7 +60,7 @@ kubectl apply -f deploy/
 
 This creates a Statestore Dapr Component, a Node application and a Python application. 
 
-If you check the `deploy/node.yaml` and `deploy/python.yaml` files you will notice that both are defining two environment variables: 
+If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files you see that both are define two environment variables: 
 
 ```yaml
         - name: DAPR_HTTP_ENDPOINT
