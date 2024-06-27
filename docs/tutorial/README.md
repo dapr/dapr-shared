@@ -52,7 +52,7 @@ Next install a Redis instance into the cluster using Helm
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis --version 17.11.3 --set "architecture=standalone" --set "master.persistence.size=1Gi"
 ```
 
-Once Redis is installed we can deploy our application workloads, including the Statestore component by running: 
+Once Redis is installed you can deploy our application workloads, including a statestore component by running: 
 
 ```shell
 kubectl apply -f deploy/
