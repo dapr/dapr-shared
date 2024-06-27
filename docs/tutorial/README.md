@@ -58,7 +58,7 @@ Once Redis is installed we can deploy our application workloads, including the S
 kubectl apply -f deploy/
 ```
 
-This creates a Statestore Dapr Component, a Node application and a Python application. 
+This creates a statestore component, a Node application and a Python application. 
 
 If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files you see that both are define two environment variables: 
 
