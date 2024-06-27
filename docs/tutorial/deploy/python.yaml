@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pythonapp
+  labels:
+    app: python
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python
+  template:
+    metadata:
+      labels:
+        app: python
+    spec:
+      containers:
+      - name: python
+        image: ghcr.io/dapr/samples/hello-k8s-python:latest
+        env: 
+        - name: DAPR_HTTP_ENDPOINT
+          value: http://pythonapp-dapr.default.svc.cluster.local:3500
+        - name: DAPR_GRPC_ENDPOINT
+          value: http://pythonapp-dapr.default.svc.cluster.local:50001

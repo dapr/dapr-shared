@@ -1,0 +1,45 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nodeapp
+  labels:
+    app: node
+spec:
+  selector:
+    app: node
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp
+  labels:
+    app: node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node
+  template:
+    metadata:
+      labels:
+        app: node
+    spec:
+      containers:
+      - name: node
+        image: ghcr.io/dapr/samples/hello-k8s-node:latest
+        env:
+        - name: APP_PORT
+          value: "3000"
+        - name: DAPR_HTTP_ENDPOINT
+          value: http://nodeapp-dapr.default.svc.cluster.local:3500
+        - name: DAPR_GRPC_ENDPOINT
+          value: http://nodeapp-dapr.default.svc.cluster.local:50001
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: Always
