@@ -71,7 +71,7 @@ If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files you see tha
 
 These two environment variables let the Dapr SDK know where the Dapr endpoints are hosted (usually for the sidecar these are located on `localhost`).
 
-Because these workloads are not annotated with Dapr annotations, the Dapr Control Plane will not inject the Dapr Sidecar, instead we will create two instances of the Dapr Shared Helm Chart for our services to use.
+Because these workloads are not annotated with Dapr annotations, the Dapr Control Plane will not inject a Dapr sidecar, instead we will create two instances of the Dapr runtime using Dapr Shared for our services to use.
 
 
 ## Creating two Dapr Shared instances for our services
