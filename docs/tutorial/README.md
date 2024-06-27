@@ -92,7 +92,7 @@ Let's do the same for the Python application:
 helm install pythonapp-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=pythonapp
 ```
 
-Once both Dapr Shared instances are up, the application should be able to connect to the Dapr APIs. You can validate this by interacting with the `nodeapp` by running: 
+Once both Dapr Shared instances are up, the application can connect to the Dapr APIs on the shared instance for the particular application. You can validate this by interacting with the `nodeapp` by running: 
 
 ```
 kubectl port-forward service/nodeapp 8080:80
