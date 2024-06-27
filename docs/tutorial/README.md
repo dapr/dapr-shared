@@ -1,6 +1,6 @@
 # Dapr Shared Getting Started Tutorial
 
-This tutorial follows up on the Dapr Kubernetes tutorial that can be located here: 
+This tutorial follows up on the Dapr Hello Kubernetes tutorial that can be found here in the Dapr Quickstart repo: 
 
 https://github.com/dapr/quickstarts/tree/master/tutorials/hello-kubernetes
 
