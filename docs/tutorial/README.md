@@ -44,7 +44,7 @@ helm upgrade --install dapr dapr/dapr \
 Or use the Dapr CLI to install the latest version with the following command
 
 `dapr init -k`
-## Running the Hello example
+## Running the Hello Kubernetes example
 
 We will be using the Dapr Statestore API and for that we will install a Redis instance into our cluster using Helm: 
 
