@@ -81,7 +81,7 @@ For each application service that needs to talk to the Dapr APIs we need to depl
 Let's create a new Dapr Shared instance for the Node (`nodeapp`) application: 
 
 ```sh
-helm install nodeapp-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=nodeapp
+helm install nodeapp-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=nodeapp --set shared.strategy=deployment --set shared.remoteURL=nodeapp.default.svc.cluster.local --set shared.remotePort=80
 ```
 
 Notice that the `shared.appId` is the name used for the endpoint variables defined in the previous section. 
@@ -89,7 +89,7 @@ Notice that the `shared.appId` is the name used for the endpoint variables defin
 Let's do the same for the Python application: 
 
 ```sh
-helm install pythonapp-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=pythonapp
+helm install pythonapp-shared oci://docker.io/daprio/dapr-shared-chart --set shared.appId=pythonapp --set shared.strategy=deployment
 ```
 
 Once both Dapr Shared instances are up, the application can connect to the Dapr APIs on the shared instance for the particular application. You can validate this by interacting with the `nodeapp` by running: 
