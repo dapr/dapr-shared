@@ -104,7 +104,7 @@ func InitHandler() {
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
-			Namespace: getNamespace(),
+			Namespace: namespace,
 		},
 		Data: map[string]string{
 			daprTrustAnchorsConfigMapKey:   rootCert,
