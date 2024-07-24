@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/dapr/dapr/pkg/injector/sidecar"
 	daprutils "github.com/dapr/dapr/utils"
@@ -21,6 +22,8 @@ const (
 	namespaceDefault               string = "default"
 	DaprSystemNamespace            string = "dapr-system"
 	DaprControlPlaneNamespace      string = "DAPR_CONTROL_PLANE_NAMESPACE"
+	DaprSharedInstanceNamespace    string = "DAPR_SHARED_INSTANCE_NAMESPACE"
+	namespaceFilePath                     = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 )
 
 var configMapName string
@@ -97,10 +100,11 @@ func InitHandler() {
 
 	rootCert, certChain, certKey := c.Get(ctx, LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace))
 
+	namespace := getNamespace()
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
-			Namespace: namespaceDefault,
+			Namespace: getNamespace(),
 		},
 		Data: map[string]string{
 			daprTrustAnchorsConfigMapKey:   rootCert,
@@ -109,16 +113,35 @@ func InitHandler() {
 		},
 	}
 
-	_, err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Get(ctx, configMapName, metav1.GetOptions{})
+	_, err := kubeClient.CoreV1().ConfigMaps(namespace).Get(ctx, configMapName, metav1.GetOptions{})
 	if err == nil {
-		err := kubeClient.CoreV1().ConfigMaps(namespaceDefault).Delete(ctx, configMapName, metav1.DeleteOptions{})
+		err := kubeClient.CoreV1().ConfigMaps(namespace).Delete(ctx, configMapName, metav1.DeleteOptions{})
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	_, err = kubeClient.CoreV1().ConfigMaps(namespaceDefault).Create(ctx, configMap, metav1.CreateOptions{})
+	_, err = kubeClient.CoreV1().ConfigMaps(namespace).Create(ctx, configMap, metav1.CreateOptions{})
 	if err != nil {
 		panic(err)
 	}
+}
+
+// getNamespace retrieves the Kubernetes namespace from the service account file or an environment variable.
+func getNamespace() string {
+	// Read the namespace file
+	bytes, err := os.ReadFile(namespaceFilePath)
+	if err == nil {
+		namespace := string(bytes)
+		// Trim any whitespace
+		namespace = strings.TrimSpace(namespace)
+		if namespace != "" {
+			return namespace
+		}
+	}
+
+	// Fall back to environment variable or default value
+	namespace := LookupEnvOrString(DaprSharedInstanceNamespace, namespaceDefault)
+
+	return namespace
 }
