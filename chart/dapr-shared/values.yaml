@@ -35,7 +35,7 @@ shared:
       # -- The dapr-shared image name.
       name: dapr-shared
       # -- The dapr-shared-init image tag.
-      tag: 0.0.10
+      tag: 0.0.15
       # -- The init container pull policy.
       pullPolicy: Always
   scheduling:
