@@ -65,7 +65,7 @@ shared:
       # -- Daprd image.
       name: daprd
       # -- Daprd image version.
-      tag: 1.13.2
+      tag: 1.13.5
       # -- Daprd image pull policy.
       pullPolicy: Always
     metrics:
