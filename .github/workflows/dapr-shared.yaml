@@ -210,6 +210,6 @@ jobs:
           helm package \
           ./chart/dapr-shared \
           --version ${REL_VERSION}
-          helm registry login -u ${{ secrets.DOCKER_REGISTRY_ID }} oci://docker.io/
+          helm registry login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }} oci://docker.io/
           helm push dapr-shared-chart-${REL_VERSION}.tgz oci://docker.io/${{ secrets.DOCKER_DAPRIO_REGISTRY }}
         shell: bash
