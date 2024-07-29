@@ -200,7 +200,7 @@ jobs:
       - name: Container Registry login
         uses: docker/login-action@v2
         env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_REGISTRY_ID }}
+          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_DAPRIO_REGISTRY }}
         with:
           username: ${{ secrets.DOCKER_REGISTRY_ID }}
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
