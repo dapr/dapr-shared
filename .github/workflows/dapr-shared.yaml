@@ -197,14 +197,6 @@ jobs:
           sed -i -e "s|tag: latest|tag: ${REL_VERSION}|g" ./chart/dapr-shared/values.yaml
           cat ./chart/dapr-shared/values.yaml
       
-      - name: Container Registry login
-        uses: docker/login-action@v2
-        env:
-          DOCKER_REGISTRY_ID: ${{ secrets.DOCKER_DAPRIO_REGISTRY }}
-        with:
-          username: ${{ secrets.DOCKER_REGISTRY_ID }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
-      
       - name: Package & Push Helm Chart
         run : |
           helm package \
