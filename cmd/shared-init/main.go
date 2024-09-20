@@ -16,14 +16,12 @@ import (
 )
 
 const (
-	daprTrustAnchorsConfigMapKey   string = "dapr-trust-anchors"
-	daprTrustCertChainConfigMapKey string = "dapr-cert-chain"
-	daprTrustCertKeyConfigMapKey   string = "dapr-cert-key"
-	namespaceDefault               string = "default"
-	DaprSystemNamespace            string = "dapr-system"
-	DaprControlPlaneNamespace      string = "DAPR_CONTROL_PLANE_NAMESPACE"
-	DaprSharedInstanceNamespace    string = "DAPR_SHARED_INSTANCE_NAMESPACE"
-	namespaceFilePath                     = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+	daprTrustAnchorsConfigMapKey string = "dapr-trust-anchors"
+	namespaceDefault             string = "default"
+	DaprSystemNamespace          string = "dapr-system"
+	DaprControlPlaneNamespace    string = "DAPR_CONTROL_PLANE_NAMESPACE"
+	DaprSharedInstanceNamespace  string = "DAPR_SHARED_INSTANCE_NAMESPACE"
+	namespaceFilePath                   = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 )
 
 var configMapName string
@@ -98,7 +96,7 @@ func InitHandler() {
 
 	c := NewDaprSidecarClient(kubeClient)
 
-	rootCert, certChain, certKey := c.Get(ctx, LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace))
+	rootCert, _, _ := c.Get(ctx, LookupEnvOrString(DaprControlPlaneNamespace, DaprSystemNamespace))
 
 	namespace := getNamespace()
 	configMap := &corev1.ConfigMap{
@@ -107,9 +105,7 @@ func InitHandler() {
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			daprTrustAnchorsConfigMapKey:   rootCert,
-			daprTrustCertChainConfigMapKey: certChain,
-			daprTrustCertKeyConfigMapKey:   certKey,
+			daprTrustAnchorsConfigMapKey: rootCert,
 		},
 	}
 
