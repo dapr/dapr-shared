@@ -75,16 +75,6 @@
               configMapKeyRef:
                 name: {{ .Release.Name }}-shared-cm
                 key: dapr-trust-anchors
-          - name: DAPR_CERT_CHAIN
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Release.Name }}-shared-cm
-                key: dapr-cert-chain
-          - name: DAPR_CERT_KEY
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Release.Name }}-shared-cm
-                key: dapr-cert-key
           - name: DAPR_CONTROL_PLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.shared.controlPlane.namespace }}
           - name: DAPR_API_TOKEN
