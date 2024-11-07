@@ -11,11 +11,23 @@ shared:
     level: info
     # -- The daprd log format.
     json: true
+  scheduler:
+    address: dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006
   controlPlane:
     # -- Namespace where Dapr Control Plane is.
     namespace: "dapr-system"
     # -- Trust Domain used by the Dapr Control Plane
     trustDomain: "cluster.local"
+
+    operator:
+      address: dapr-api.dapr-system.svc.cluster.local
+      port: 80
+    sentry:
+      address: dapr-sentry.dapr-system.svc.cluster.local
+      port: 80
+    placementServer:
+      address: dapr-placement-server.dapr-system.svc.cluster.local
+      port: 50005
   serviceAccount:
     # -- Allows the option to create or not the service account.
     create: true
@@ -42,6 +54,8 @@ shared:
     # -- node selector for shared Dapr
     nodeSelector: {}
   daprd:
+    serviceAccountIdentityToken:
+      audience: spiffe://cluster.local/ns/dapr-system/dapr-sentry
     app:
       # -- Dapr which protocol your application is using. Valid options are `http`` and `grpc``.
       protocol: "http"
@@ -49,6 +63,9 @@ shared:
     token: ""
     # -- The HTTP port for the Dapr API.
     httpPort: 3500
+
+    gracefulShutdownSeconds: -1
+
     # -- gRPC port for the Dapr Internal API to listen on.
     grpcPort: 50001
     # -- gRPC port for the Dapr Internal API to listen on.
@@ -65,7 +82,7 @@ shared:
       # -- Daprd image.
       name: daprd
       # -- Daprd image version.
-      tag: 1.13.5
+      tag: 1.14.4
       # -- Daprd image pull policy.
       pullPolicy: Always
     metrics:

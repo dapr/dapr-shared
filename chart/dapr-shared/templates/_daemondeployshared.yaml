@@ -8,6 +8,7 @@
       {{- end }}
       labels:
         dapr.io/app-id: {{ .Values.shared.appId }}
+        #sidecar.istio.io/inject: "false"
         {{- include "dapr-shared.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
@@ -16,7 +17,7 @@
           defaultMode: 420
           sources:
           - serviceAccountToken:
-              audience: dapr.io/sentry
+              audience: {{ .Values.shared.daprd.serviceAccountIdentityToken.audience }}
               expirationSeconds: 7200
               path: token
       - name: shared-data
@@ -42,7 +43,7 @@
           imagePullPolicy: {{ .Values.shared.daprd.image.pullPolicy }}
           args:
           - /daprd
-          - --mode=kubernetes 
+          - --mode=kubernetes
           - --log-level={{ .Values.shared.log.level }}
           - --log-as-json={{ .Values.shared.log.json }}
           - --dapr-http-port={{ .Values.shared.daprd.httpPort }}
@@ -50,12 +51,13 @@
           - --dapr-internal-grpc-port={{ .Values.shared.daprd.internalGrpcPort }}
           - --dapr-listen-addresses={{ .Values.shared.daprd.listenAddresses }}
           - --dapr-public-port={{ .Values.shared.daprd.publicPort }}
+          - --dapr-graceful-shutdown-seconds={{ .Values.shared.daprd.gracefulShutdownSeconds }}
           - --app-id={{ required ".Values.shared.appId is required" .Values.shared.appId }}
           - --app-port={{ required ".Values.shared.remotePort is required" .Values.shared.remotePort }}
           - --app-protocol={{ required ".Values.shared.daprd.app.protocol is required" .Values.shared.daprd.app.protocol }}
-          - --control-plane-address={{ default "dapr-api.dapr-system.svc.cluster.local:80" .Values.shared.controlPlane.operatorAddress }}
-          - --placement-host-address={{ default "dapr-placement-server.dapr-system.svc.cluster.local:50005"  .Values.shared.controlPlane.placementServerAddress }}
-          - --sentry-address={{ default "dapr-sentry.dapr-system.svc.cluster.local:80" .Values.shared.controlPlane.sentryAddress }}
+          - --control-plane-address={{ .Values.shared.controlPlane.operator.address }}:{{ .Values.shared.controlPlane.operator.port }}
+          - --placement-host-address={{ .Values.shared.controlPlane.placementServer.address }}:{{ .Values.shared.controlPlane.placementServer.port }}
+          - --sentry-address={{ .Values.shared.controlPlane.sentry.address }}:{{ .Values.shared.controlPlane.sentry.port }}
           - --enable-metrics={{ .Values.shared.daprd.metrics.enabled }}
           - --metrics-port={{ .Values.shared.daprd.metrics.port }}
           - --enable-mtls={{ .Values.shared.daprd.mtls.enabled }}
@@ -75,30 +77,15 @@
               configMapKeyRef:
                 name: {{ .Release.Name }}-shared-cm
                 key: dapr-trust-anchors
-          - name: DAPR_CERT_CHAIN
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Release.Name }}-shared-cm
-                key: dapr-cert-chain
-          - name: DAPR_CERT_KEY
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Release.Name }}-shared-cm
-                key: dapr-cert-key
-          - name: DAPR_CONTROL_PLANE_NAMESPACE
+          - name: DAPR_CONTROLPLANE_NAMESPACE
             value: {{ default "dapr-system" .Values.shared.controlPlane.namespace }}
+          - name: DAPR_SCHEDULER_HOST_ADDRESS
+            value: {{ default "dapr-system" .Values.shared.scheduler.address }}
           - name: DAPR_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ include "dapr-shared.fullname" . }}
                 key: dapr-api-token
-          {{- if .Values.shared.daprd.app.token }}
-          - name: APP_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "dapr-shared.fullname" . }}
-                key: app-api-token
-          {{- end }}
           - name: DAPR_CONTROLPLANE_TRUST_DOMAIN
             value: {{ .Values.shared.controlPlane.trustDomain }}
           - name: NAMESPACE
