@@ -65,6 +65,7 @@
           - --enable-api-logging={{ .Values.shared.daprd.apiLogging.enabled }}
           - --app-channel-address={{ .Values.shared.remoteURL }}
           - --config={{ .Values.shared.daprd.config }}
+          - --disableBuiltinK8sSecretStore={{ default "false" .Values.shared.daprd.disableBuiltinK8sSecretStore }}
          {{- if .Values.shared.daprd.appHealth.enabled }}
           - --enable-app-health-check={{ .Values.shared.daprd.appHealth.enabled }}
           - --app-health-check-path={{ default "/healthz" .Values.shared.daprd.appHealth.checkPath }}
