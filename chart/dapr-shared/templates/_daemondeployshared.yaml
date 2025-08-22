@@ -8,7 +8,6 @@
       {{- end }}
       labels:
         dapr.io/app-id: {{ .Values.shared.appId }}
-        #sidecar.istio.io/inject: "false"
         {{- include "dapr-shared.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
