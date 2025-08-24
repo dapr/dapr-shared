@@ -34,7 +34,7 @@ tests:
       shared.appId: appId
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[0].args[9]
+          path: spec.template.spec.containers[0].args[10]
           pattern: --app-id=[appId]+
 
   - it: should set tolerations
@@ -106,7 +106,7 @@ tests:
           value: Always
 
   - it: |
-      should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-system for spec.template.spec.containers[0].env when
+      should set DAPR_CONTROLPLANE_NAMESPACE=dapr-system for spec.template.spec.containers[0].env when
         shared.controlPlane.namespace is empty
     values:
       - ./values/required.yaml
@@ -114,7 +114,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: DAPR_CONTROL_PLANE_NAMESPACE
+            name: DAPR_CONTROLPLANE_NAMESPACE
             value: dapr-system
 
   - it: |
@@ -130,7 +130,7 @@ tests:
             value: cluster.local
 
   - it: |
-      should set DAPR_CONTROL_PLANE_NAMESPACE=dapr-namespace for spec.template.spec.containers[0].env when
+      should set DAPR_CONTROLPLANE_NAMESPACE=dapr-namespace for spec.template.spec.containers[0].env when
         shared.controlPlane.namespace is equal to dapr-namespace
     values:
       - ./values/required.yaml
@@ -140,7 +140,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: DAPR_CONTROL_PLANE_NAMESPACE
+            name: DAPR_CONTROLPLANE_NAMESPACE
             value: dapr-namespace
 
   - it: should set spec.template.spec.containers[0].image
@@ -202,36 +202,39 @@ tests:
           value: --dapr-public-port=3501
       - equal:
           path: spec.template.spec.containers[0].args[9]
-          value: --app-id=appId
+          value: --dapr-graceful-shutdown-seconds=-1
       - equal:
           path: spec.template.spec.containers[0].args[10]
-          value: --app-port=0
+          value: --app-id=appId
       - equal:
           path: spec.template.spec.containers[0].args[11]
-          value: --app-protocol=http
+          value: --app-port=0
       - equal:
           path: spec.template.spec.containers[0].args[12]
-          value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
+          value: --app-protocol=http
       - equal:
           path: spec.template.spec.containers[0].args[13]
-          value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
+          value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
       - equal:
           path: spec.template.spec.containers[0].args[14]
-          value: --sentry-address=dapr-sentry.dapr-system.svc.cluster.local:80
+          value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
       - equal:
           path: spec.template.spec.containers[0].args[15]
-          value: --enable-metrics=true
+          value: --sentry-address=dapr-sentry.dapr-system.svc.cluster.local:80
       - equal:
           path: spec.template.spec.containers[0].args[16]
-          value: --metrics-port=9090
+          value: --enable-metrics=true
       - equal:
           path: spec.template.spec.containers[0].args[17]
-          value: --enable-mtls=false
+          value: --metrics-port=9090
       - equal:
           path: spec.template.spec.containers[0].args[18]
-          value: --enable-api-logging=true
+          value: --enable-mtls=false
       - equal:
           path: spec.template.spec.containers[0].args[19]
+          value: --enable-api-logging=true
+      - equal:
+          path: spec.template.spec.containers[0].args[20]
           value: --app-channel-address=https://local
 
   - it: should fail when shared.remotePort is empty
@@ -254,53 +257,53 @@ tests:
       - failedTemplate:
           errorMessage: .Values.shared.daprd.app.protocol is required
 
-  - it: should set --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80 when shared.controlPlane.operatorAddress is empty
+  - it: should set --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80 when shared.controlPlane.operator is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress:
+      shared.controlPlane.operator: {}
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].args[12]
+          path: spec.template.spec.containers[0].args[13]
           value: --control-plane-address=dapr-api.dapr-system.svc.cluster.local:80
 
-  - it: should set --control-plane-address=control.plane.address:80 when shared.controlPlane.operatorAddress is equal to control.plane.address:80
+  - it: should set --control-plane-address=control.plane.address:80 when shared.controlPlane.operator.address is equal to control.plane.address
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress: control.plane.address:80
+      shared.controlPlane.operator.address: control.plane.address
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].args[12]
+          path: spec.template.spec.containers[0].args[13]
           value: --control-plane-address=control.plane.address:80
 
   - it: |
       should set --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005 
-        when shared.controlPlane.placementServerAddress is empty
+        when shared.controlPlane.placementServer is empty
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress:
+      shared.controlPlane.placementServer: {}
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].args[13]
+          path: spec.template.spec.containers[0].args[14]
           value: --placement-host-address=dapr-placement-server.dapr-system.svc.cluster.local:50005
 
   - it: |
-      should set --placement-host-address=placement.host.address:80 
-        when shared.controlPlane.placementServerAddress is equal to placement.host.address:80
+      should set --placement-host-address=placement.host.address:50005 
+        when shared.controlPlane.placementServer.address is equal to placement.host.address
     values:
       - ../values.yaml
       - ./values/required.yaml
     set:
-      shared.controlPlane.operatorAddress: control.plane.address:80
+      shared.controlPlane.placementServer.address: placement.host.address
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].args[12]
-          value: --control-plane-address=control.plane.address:80
+          path: spec.template.spec.containers[0].args[14]
+          value: --placement-host-address=placement.host.address:50005
 
   # - it: should set APP_API_TOKEN if shared.daprd.app.token is true
   #   values:
