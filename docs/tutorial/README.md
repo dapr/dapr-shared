@@ -4,12 +4,12 @@ This tutorial follows up on the Dapr Hello Kubernetes tutorial that can be found
 
 https://github.com/dapr/quickstarts/tree/master/tutorials/hello-kubernetes
 
-Instead of deploying Dapr as a sidecar we are going to use Dapr Shared instances. 
+Instead of deploying Dapr as a sidecar, we are going to use Dapr Shared instances. 
 
 
 ## Prerequisites and Installation
 
-Before proceeding make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Shared.
+Before proceeding, make sure that you have the necessary tools installed on your system. We will create a local KinD cluster to install Dapr, some applications, and an instance of Dapr Shared.
 
 To get started, make sure you have the following CLIs installed:
 
@@ -36,7 +36,7 @@ Next install a version of the Dapr control plane into the cluster:
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo update
 helm upgrade --install dapr dapr/dapr \
---version=1.13.2 \
+--version=1.15.7 \
 --namespace dapr-system \
 --create-namespace \
 --wait
@@ -46,13 +46,13 @@ Or use the Dapr CLI to install the latest version with the following command
 `dapr init -k`
 ## Running the Hello Kubernetes example
 
-Next install a Redis instance into the cluster using Helm
+Next, install a Redis instance into the cluster using Helm
 
 ```shell
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis --version 17.11.3 --set "architecture=standalone" --set "master.persistence.size=1Gi"
 ```
 
-Once Redis is installed you can deploy our application workloads, including a statestore component by running: 
+Once Redis is installed, you can deploy our application workloads, including a statestore component, by running: 
 
 ```shell
 kubectl apply -f deploy/
@@ -60,7 +60,7 @@ kubectl apply -f deploy/
 
 This creates a statestore component, a Node application and a Python application. 
 
-If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files you see that both are define two environment variables: 
+If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files, you see that both define two environment variables: 
 
 ```yaml
         - name: DAPR_HTTP_ENDPOINT
@@ -69,14 +69,14 @@ If you inspect the `deploy/node.yaml` and `deploy/python.yaml` files you see tha
           value: http://nodeapp-dapr.default.svc.cluster.local:50001
 ```
 
-These two environment variables let the Dapr SDK know where the Dapr endpoints are hosted (usually for the sidecar these are located on `localhost`).
+These two environment variables let the Dapr SDK know where the Dapr endpoints are hosted (usually for the sidecar, these are located on `localhost`).
 
-Because these workloads are not annotated with Dapr annotations, the Dapr Control Plane will not inject a Dapr sidecar, instead we will create two instances of the Dapr runtime using Dapr Shared for our services to use.
+Because these workloads are not annotated with Dapr annotations, the Dapr Control Plane will not inject a Dapr sidecar; instead, we will create two instances of the Dapr runtime using Dapr Shared for our services to use.
 
 
 ## Creating two Dapr Shared instances for our services
 
-For each application service that needs to talk to the Dapr APIs we need to deploy a new Dapr Shared instance. Each instance have a one to one relationship with Dapr Application Ids. 
+For each application service that needs to talk to the Dapr APIs, we need to deploy a new Dapr Shared instance. Each instance has a one-to-one relationship with Dapr Application IDs. 
 
 Let's create a new Dapr Shared instance for the Node (`nodeapp`) application: 
 
@@ -104,7 +104,7 @@ And then sending a request to place a new order:
 curl --request POST --data "@sample.json" --header Content-Type:application/json http://localhost:8080/neworder
 ```
 
-Validate the order has been persisted: 
+Validate that the order has been persisted: 
 
 ```shell
 curl http://localhost:8080/order
