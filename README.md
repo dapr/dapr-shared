@@ -16,7 +16,7 @@ While sidecars are the default strategy, there are some use cases that require o
 
 Dapr Shared extends the Dapr sidecar model with two new deployment strategies: `DaemonSet` and `Deployment`.
 
-No matter which strategy you choose, it is important to understand that in most use cases you will have one instance of Dapr Shared (Helm Release) per service (app-id). This means that if you have an application composed by three microservices, each service is recommended to have it's own Dapr Shared instance. Check the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md), to see an application using Dapr Shared.
+No matter which strategy you choose, it is important to understand that in most use cases, you will have one instance of Dapr Shared (Helm Release) per service (app-id). This means that if you have an application composed of three microservices, each service is recommended to have its own Dapr Shared instance. Check the [step-by-step tutorial using Kubernetes KinD here](docs/tutorial/README.md), to see an application using Dapr Shared.
 
 ### Dapr Shared: DeamonSet strategy
 
@@ -48,7 +48,7 @@ If you want to look at a step-by-step tutorial using some applications and inter
 
 ## From Source
 
-To deploy this chart from the source you can run from inside the `chart/dapr-shared` directory:
+To deploy this chart from the source, you can run from inside the `chart/dapr-shared` directory:
 
 ```
 helm install my-shared . --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
