@@ -34,6 +34,9 @@
           args:
             - init
             - --config-map={{ .Release.Name }}-shared-cm
+          env:
+          - name: DAPR_CONTROL_PLANE_NAMESPACE
+            value: {{ default "dapr-system" .Values.shared.controlPlane.namespace }}
       containers:
         - name: daprd
           securityContext:
@@ -63,6 +66,7 @@
           - --enable-api-logging={{ .Values.shared.daprd.apiLogging.enabled }}
           - --app-channel-address={{ .Values.shared.remoteURL }}
           - --config={{ .Values.shared.daprd.config }}
+          - --disable-builtin-k8s-secret-store={{ default "false" .Values.shared.daprd.disableBuiltinK8sSecretStore }}
           {{- if .Values.shared.daprd.appHealth.enabled }}
           - --enable-app-health-check={{ .Values.shared.daprd.appHealth.enabled }}
           - --app-health-check-path={{ default "/healthz" .Values.shared.daprd.appHealth.checkPath }}
