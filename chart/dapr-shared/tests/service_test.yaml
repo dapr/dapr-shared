@@ -26,3 +26,59 @@ tests:
       - equal:
           path: spec.type
           value: "ClusterIP"
+
+  - it: should use the default daprd ports
+    values:
+      - ./values/required.yaml
+    asserts:
+      - equal:
+          path: spec.ports
+          value:
+            - name: dapr-http
+              port: 3500
+              protocol: TCP
+              targetPort: 3500
+            - name: dapr-grpc
+              port: 50001
+              protocol: TCP
+              targetPort: 50001
+            - name: dapr-internal
+              port: 50002
+              protocol: TCP
+              targetPort: 50002
+            - name: dapr-metrics
+              port: 9090
+              protocol: TCP
+              targetPort: 9090
+
+  - it: should use the configured daprd ports
+    values:
+      - ./values/required.yaml
+    set:
+      shared:
+        daprd:
+          httpPort: 3600
+          grpcPort: 50011
+          internalGrpcPort: 50012
+          metrics:
+            port: 9095
+    asserts:
+      - equal:
+          path: spec.ports
+          value:
+            - name: dapr-http
+              port: 3600
+              protocol: TCP
+              targetPort: 3600
+            - name: dapr-grpc
+              port: 50011
+              protocol: TCP
+              targetPort: 50011
+            - name: dapr-internal
+              port: 50012
+              protocol: TCP
+              targetPort: 50012
+            - name: dapr-metrics
+              port: 9095
+              protocol: TCP
+              targetPort: 9095

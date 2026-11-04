@@ -8,20 +8,20 @@ spec:
   type: {{ default "ClusterIP" .Values.shared.service.type }}
   ports:
     - name: dapr-http
-      port: 3500
+      port: {{ .Values.shared.daprd.httpPort }}
       protocol: TCP
-      targetPort: 3500
+      targetPort: {{ .Values.shared.daprd.httpPort }}
     - name: dapr-grpc
-      port: 50001
+      port: {{ .Values.shared.daprd.grpcPort }}
       protocol: TCP
-      targetPort: 50001
+      targetPort: {{ .Values.shared.daprd.grpcPort }}
     - name: dapr-internal
-      port: 50002
+      port: {{ .Values.shared.daprd.internalGrpcPort }}
       protocol: TCP
-      targetPort: 50002
+      targetPort: {{ .Values.shared.daprd.internalGrpcPort }}
     - name: dapr-metrics
-      port: 9090
+      port: {{ .Values.shared.daprd.metrics.port }}
       protocol: TCP
-      targetPort: 9090
+      targetPort: {{ .Values.shared.daprd.metrics.port }}
   selector:
     {{- include "dapr-shared.selectorLabels" . | nindent 4 }}
