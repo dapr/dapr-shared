@@ -47,7 +47,7 @@ Customize Dapr Shared using custom Helm values.
 | shared.controlPlane.sentry.port | int | `80` |  |
 | shared.controlPlane.trustDomain | string | `"cluster.local"` | Trust Domain used by the Dapr Control Plane |
 | shared.daprd.apiLogging.enabled | bool | `true` | Enables API logging for the daprd. |
-| shared.daprd.app.protocol | string | `"http"` | Dapr which protocol your application is using. Valid options are `http` and `grpc`. |
+| shared.daprd.app.protocol | string | `"http"` | Dapr which protocol your application is using. Valid options are `http`` and `grpc``. |
 | shared.daprd.appHealth.enabled | bool | `false` | Enables the app health checks |
 | shared.daprd.appHealth.path | string | `"/healthz"` | Path that Dapr invokes for health probes when the app channel is HTTP (this value is ignored if the app channel is using gRPC) |
 | shared.daprd.appHealth.probeInterval | int | `5` | Number of seconds between each health probe |
