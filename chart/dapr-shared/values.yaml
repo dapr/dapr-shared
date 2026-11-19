@@ -57,7 +57,7 @@ shared:
     serviceAccountIdentityToken:
       audience: spiffe://cluster.local/ns/dapr-system/dapr-sentry
     app:
-      # -- Dapr which protocol your application is using. Valid options are `http`` and `grpc``.
+      # -- Dapr which protocol your application is using. Valid options are `http` and `grpc`.
       protocol: "http"
     # -- Dapr API token to use for token based API authentication.
     token: ""

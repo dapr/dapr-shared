@@ -8,73 +8,87 @@ If you need multiple Dapr Applications you can deploy this chart multiple times 
 
 ## Getting Started
 
-If you want to get started with Dapr Shared you can easily create a new Dapr Shared instance by install the oficial Helm Chart:
+Before installing Dapr Shared, please ensure you have Dapr installed in your cluster.
+
+If you want to get started with Dapr Shared, you can easily create a new Dapr Shared instance by installing the official Helm Chart:
 
 ```
-helm add repo shared https://salaboy.github.io/helm/
-helm repo update
-helm install my-shard shared/dapr-shared  --set shared.appId=<DAPR_APP_ID> --set shared.channelAddress=<REMOTE_URL> --set shared.daprd.app.port=<REMOTE_PORT>
+helm install my-shared-instance oci://registry-1.docker.io/daprio/dapr-shared-chart --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
 ```
 
-If you want to take a look at a step by step tutorial using some applications and interacting with Dapr Components check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
+If you want to look at a step-by-step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](../../docs/tutorial/README.md).
 
 ## From Source
 
 To deploy this chart from source you can run from inside the `chart/dapr-shared` directory:
 
 ```
-helm install my-shared . --set shared.appId=<DAPR_APP_ID> --set shared.channelAddress=<REMOTE_URL> 
+helm install my-shared . --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
 
 ```
 
-Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (for example for scopes)
-
-and `<REMOTE_URL>` is a reachable URL where `dapr-shared` will forward notifications received by the Dapr sidecar.
+Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (for example, for scopes) and `<REMOTE_URL>` and `<REMOTE_PORT>` are a reachable URL and Port where the `dapr-shared` instance will forward subscriptions received by the Dapr sidecar.
 
 Future versions might include forwarding notifications to multiple remote URLs.
 
 ## Customize Dapr Shared
-Is possible to customize Dapr Shared using custom Helm values.
+Customize Dapr Shared using custom Helm values.
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | shared.controlPlane.namespace | string | `"dapr-system"` | Namespace where Dapr Control Plane is. |
+| shared.controlPlane.operator.address | string | `"dapr-api.dapr-system.svc.cluster.local"` |  |
+| shared.controlPlane.operator.port | int | `80` |  |
+| shared.controlPlane.placementServer.address | string | `"dapr-placement-server.dapr-system.svc.cluster.local"` |  |
+| shared.controlPlane.placementServer.port | int | `50005` |  |
+| shared.controlPlane.sentry.address | string | `"dapr-sentry.dapr-system.svc.cluster.local"` |  |
+| shared.controlPlane.sentry.port | int | `80` |  |
+| shared.controlPlane.trustDomain | string | `"cluster.local"` | Trust Domain used by the Dapr Control Plane |
 | shared.daprd.apiLogging.enabled | bool | `true` | Enables API logging for the daprd. |
-| shared.daprd.app.protocol | string | `"http"` | Dapr which protocol your application is using. Valid options are `http`` and `grpc``. |
+| shared.daprd.app.protocol | string | `"http"` | Dapr which protocol your application is using. Valid options are `http` and `grpc`. |
+| shared.daprd.appHealth.enabled | bool | `false` | Enables the app health checks |
+| shared.daprd.appHealth.path | string | `"/healthz"` | Path that Dapr invokes for health probes when the app channel is HTTP (this value is ignored if the app channel is using gRPC) |
+| shared.daprd.appHealth.probeInterval | int | `5` | Number of seconds between each health probe |
+| shared.daprd.appHealth.probeTimeout | int | `500` | Timeout in milliseconds for health probe requests |
+| shared.daprd.appHealth.threshold | int | `3` | Max number of consecutive failures before the app is considered unhealthy |
+| shared.daprd.config | string | `""` | name of configuration |
+| shared.daprd.gracefulShutdownSeconds | int | `-1` |  |
 | shared.daprd.grpcPort | int | `50001` | gRPC port for the Dapr Internal API to listen on. |
 | shared.daprd.httpPort | int | `3500` | The HTTP port for the Dapr API. |
 | shared.daprd.image.name | string | `"daprd"` | Daprd image. |
 | shared.daprd.image.pullPolicy | string | `"Always"` | Daprd image pull policy. |
 | shared.daprd.image.registry | string | `"docker.io/daprio"` | Daprd image registry. |
-| shared.daprd.image.tag | string | `"1.11.0-rc.7"` | Daprd image version. |
+| shared.daprd.image.tag | string | `"1.19.1"` | Daprd image version. |
 | shared.daprd.internalGrpcPort | int | `50002` | gRPC port for the Dapr Internal API to listen on. |
 | shared.daprd.listenAddresses | string | `"0.0.0.0"` | Comma separated list of IP addresses that daprd will listen to. Defaults to all in standalone mode. Defaults to [::1],127.0.0.1 in Kubernetes. To listen to all IPv4 addresses, use 0.0.0.0. To listen to all IPv6 addresses, use [::]. |
 | shared.daprd.metrics.enabled | bool | `true` | Enable prometheus metric. |
 | shared.daprd.metrics.port | int | `9090` | Sets the port for the sidecar metrics server. |
 | shared.daprd.mtls.enabled | bool | `false` | Enables automatic mTLS for daprd to daprd communication channels. |
 | shared.daprd.publicPort | int | `3501` | The HTTP public port for the Dapr API. |
+| shared.daprd.serviceAccountIdentityToken.audience | string | `"spiffe://cluster.local/ns/dapr-system/dapr-sentry"` |  |
 | shared.daprd.token | string | `""` | Dapr API token to use for token based API authentication. |
 | shared.deployment.replicas | int | `1` | The quantity of replicas. This property is set only when `shared.strategy` is equal to `deployment` |
 | shared.initContainer.image.name | string | `"dapr-shared"` | The dapr-shared image name. |
 | shared.initContainer.image.pullPolicy | string | `"Always"` | The init container pull policy. |
-| shared.initContainer.image.registry | string | `"docker.io/matheuscruzdev"` | The dapr-shared image registry. |
-| shared.initContainer.image.tag | string | `"latest"` | The dapr-shared-init image tag. |
+| shared.initContainer.image.registry | string | `"docker.io/daprio"` | The dapr-shared image registry. |
+| shared.initContainer.image.tag | string | `"0.0.15"` | The dapr-shared-init image tag. |
 | shared.initContainer.token | string | `""` | The dapr API token. |
 | shared.log.json | bool | `true` | The daprd log format. |
 | shared.log.level | string | `"info"` | The daprd log level. |
 | shared.remotePort | int | `0` | The remote port. |
+| shared.scheduler.address | string | `"dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006"` |  |
+| shared.scheduling.nodeSelector | object | `{}` | node selector for shared Dapr |
 | shared.service.type | string | `"ClusterIP"` | The daprd service type. |
 | shared.serviceAccount.annotations | object | `{}` |  |
-| shared.serviceAccount.create | bool | `true` |  |
-| shared.serviceAccount.name | string | `""` |  |
+| shared.serviceAccount.create | bool | `true` | Allows the option to create or not the service account. |
+| shared.serviceAccount.name | string | `""` | Kubernetes Service Account name. |
 | shared.strategy | string | `"daemonset"` | The default strategy to run dapr in shared mode. Possible values `daemonset`, `deployment`. |
-| tolerations | list | `[]` |  |
 
 ### Building from source
 
-I've used the [CNCF `ko` project](https://ko.build/) to build multiplatform images for the proxy.
+The [CNCF `ko` project](https://ko.build/) is used to build multiplatform images for the proxy.
 You can run the following command to build containers for the `dapr-shared` proxy:
 
 ```
