@@ -1,5 +1,10 @@
 # Dapr Shared
 
+[![Build](https://github.com/dapr/dapr-shared/actions/workflows/dapr-shared.yaml/badge.svg)](https://github.com/dapr/dapr-shared/actions/workflows/dapr-shared.yaml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+Dapr Shared runs the Dapr runtime (`daprd`) on Kubernetes as a shared `DaemonSet` or `Deployment` instead of a per-pod sidecar. [Dapr](https://dapr.io) is a portable, event-driven runtime that provides APIs for building distributed applications. For more details, see the [Dapr Shared documentation](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-dapr-shared/).
+
 Dapr Shared allows you to create Dapr Applications using the `daprd` Sidecar as a Kubernetes `Daemonset` or `Deployment`. This enables other use cases where Sidecars are not the best option.
 
 By running `daprd` as a Kubernetes `DaemonSet` resource, the `daprd` container will be running in each Kubernetes Node, reducing the network hops between the applications and Dapr. You can also choose to run Dapr Shared as a Kubernetes `Deployment`, in which case, the Kubernetes scheduler will decide in which node the Dapr Shared instance will run.
@@ -16,9 +21,9 @@ While sidecars are the default strategy, there are some use cases that require o
 
 Dapr Shared extends the Dapr sidecar model with two new deployment strategies: `DaemonSet` and `Deployment`.
 
-No matter which strategy you choose, it is important to understand that in most use cases you will have one instance of Dapr Shared (Helm Release) per service (app-id). This means that if you have an application composed by three microservices, each service is recommended to have it's own Dapr Shared instance. Check the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md), to see an application using Dapr Shared.
+No matter which strategy you choose, it is important to understand that in most use cases you will have one instance of Dapr Shared (Helm Release) per service (app-id). This means that if you have an application composed by three microservices, each service is recommended to have its own Dapr Shared instance. Check the [step-by-step tutorial using Kubernetes KinD here](docs/tutorial/README.md), to see an application using Dapr Shared.
 
-### Dapr Shared: DeamonSet strategy
+### Dapr Shared: DaemonSet strategy
 
 [Kubernetes `DaemonSets`](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) allows you to define workloads that need to be deployed once per node in the cluster. This enables workloads that are running in the same node to communicate with local `daprd` APIs, no matter where the Kubernetes Scheduler schedules your workload. 
 
@@ -44,7 +49,7 @@ If you want to get started with Dapr Shared, you can easily create a new Dapr Sh
 helm install my-shared-instance oci://registry-1.docker.io/daprio/dapr-shared-chart --set shared.appId=<DAPR_APP_ID> --set shared.remoteURL=<REMOTE_URL> --set shared.remotePort=<REMOTE_PORT>
 ```
 
-If you want to look at a step-by-step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](tutorial/README.md).
+If you want to look at a step-by-step tutorial using some applications and interacting with Dapr Components, check out the [step-by-step tutorial using Kubernetes KinD here](docs/tutorial/README.md).
 
 ## From Source
 
@@ -60,54 +65,11 @@ Where `<DAPR_APP_ID>` is the Dapr App Id that you can use in your components (fo
 
 ## Customize Dapr Shared
 
-Customize Dapr Shared using custom Helm values
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| shared.controlPlane.namespace | string | `"dapr-system"` | Namespace where Dapr Control Plane is. |
-| shared.daprd.apiLogging.enabled | bool | `true` | Enables API logging for the daprd. |
-| shared.daprd.app.protocol | string | `"http"` | Dapr which protocol your application is using. Valid options are `http`` and `grpc``. |
-| shared.daprd.grpcPort | int | `50001` | gRPC port for the Dapr Internal API to listen on. |
-| shared.daprd.httpPort | int | `3500` | The HTTP port for the Dapr API. |
-| shared.daprd.image.name | string | `"daprd"` | Daprd image. |
-| shared.daprd.image.pullPolicy | string | `"Always"` | Daprd image pull policy. |
-| shared.daprd.image.registry | string | `"docker.io/daprio"` | Daprd image registry. |
-| shared.daprd.image.tag | string | `"1.11.0"` | Daprd image version. |
-| shared.daprd.internalGrpcPort | int | `50002` | gRPC port for the Dapr Internal API to listen on. |
-| shared.daprd.listenAddresses | string | `"0.0.0.0"` | Comma separated list of IP addresses that daprd will listen to. Defaults to all in standalone mode. Defaults to [::1],127.0.0.1 in Kubernetes. To listen to all IPv4 addresses, use 0.0.0.0. To listen to all IPv6 addresses, use [::]. |
-| shared.daprd.metrics.enabled | bool | `true` | Enable prometheus metric. |
-| shared.daprd.metrics.port | int | `9090` | Sets the port for the sidecar metrics server. |
-| shared.daprd.mtls.enabled | bool | `false` | Enables automatic mTLS for daprd to daprd communication channels. |
-| shared.daprd.publicPort | int | `3501` | The HTTP public port for the Dapr API. |
-| shared.daprd.token | string | `""` | Dapr API token to use for token based API authentication. |
-| shared.daprd.config | string | `""` | Name of Dapr configuration specification to be used. |
-| shared.daprd.appHealth.enabled | bool | false | Enables the app health checks |
-| shared.daprd.appHealth.checkPath | string | `"/healthz"` | Path that Dapr invokes for health probes when the app channel is HTTP (this value is ignored if the app channel is using gRPC) |
-| shared.daprd.appHealth.probeInterval | int | `5` | Number of seconds between each health probe |
-| shared.daprd.appHealth.probeTimeout | int | `500` | Timeout in milliseconds for health probe requests |
-| shared.daprd.appHealth.threshold | int | `3` | Max number of consecutive failures before the app is considered unhealthy |
-| shared.deployment.replicas | int | `1` | The quantity of replicas. This property is set only when `shared.strategy` is equal to `deployment` |
-| shared.initContainer.image.name | string | `"dapr-shared"` | The dapr-shared image name. |
-| shared.initContainer.image.pullPolicy | string | `"Always"` | The init container pull policy. |
-| shared.initContainer.image.registry | string | `"docker.io/matheuscruzdev"` | The dapr-shared image registry. |
-| shared.initContainer.image.tag | string | `"latest"` | The dapr-shared-init image tag. |
-| shared.initContainer.token | string | `""` | The dapr API token. |
-| shared.log.json | bool | `true` | The daprd log format. |
-| shared.log.level | string | `"info"` | The daprd log level. |
-| shared.remotePort | int | `0` | The remote port. |
-| shared.service.type | string | `"ClusterIP"` | The daprd service type. |
-| shared.serviceAccount.annotations | object | `{}` |  |
-| shared.serviceAccount.create | bool | `true` | Allows the option to create or not the service account. |
-| shared.serviceAccount.name | string | `""` | Kubernetes Service Account name. |
-| shared.strategy | string | `"daemonset"` | The default strategy to run dapr in shared mode. Possible values `daemonset`, `deployment`. |
-
----
-
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
+Customize Dapr Shared using custom Helm values. See the [chart README](chart/dapr-shared/README.md) for the list of available values, and [`values.yaml`](chart/dapr-shared/values.yaml) for their current defaults.
 
 ### Building from source
 
-I've used the [CNCF `ko` project](https://ko.build/) to build multiplatform images for the proxy.
+The [CNCF `ko` project](https://ko.build/) is used to build multiplatform images for the proxy.
 You can run the following command to build containers for the `dapr-shared` proxy:
 
 ```
